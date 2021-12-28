@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 from gamesopt.games import Game
 
 
@@ -7,5 +8,5 @@ class Optimizer(ABC):
         self.game = game
 
     @abstractmethod
-    def step(self) -> None:
+    def step(self, index: Optional[int] = None) -> None:
         pass

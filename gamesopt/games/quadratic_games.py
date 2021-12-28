@@ -1,4 +1,3 @@
-from typing import List
 from .base import Game
 import torch
 import math
@@ -42,6 +41,9 @@ class QuadraticGame(Game):
 
     def sample(self, n: int = 1) -> torch.Tensor:
         return torch.randint(self.num_samples, size=(n, ))
+
+    def sample_batch(self) -> torch.Tensor:
+        return torch.arange(self.num_samples).long()
 
     def loss(self, index: int) -> torch.Tensor:
         loss =  []

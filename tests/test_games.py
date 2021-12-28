@@ -1,5 +1,6 @@
 import unittest
 from gamesopt.games import QuadraticGame
+from gamesopt.games import KellyAuction
 
 
 class TestGames(unittest.TestCase):
@@ -12,3 +13,9 @@ class TestGames(unittest.TestCase):
         game.operator(index)
         game.hamiltonian()
         game.dist2opt()
+
+    def test_kelly_auction(self):
+        game = KellyAuction()
+        game.loss()
+        game.operator()
+        game.hamiltonian()

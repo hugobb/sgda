@@ -8,7 +8,7 @@ class SGDA(Optimizer):
         super().__init__(game)
         self.lr = lr
 
-    def step(self, index: int) -> None:
+    def step(self, index: Optional[int] = None) -> None:
         grad = self.game.operator(index)
         
         for i in range(self.game.num_players):
