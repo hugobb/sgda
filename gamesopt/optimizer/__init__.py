@@ -1,18 +1,17 @@
-from abc import ABC
+from .base import Optimizer
+from .sgda import SGDA
+from gamesopt.games import Game
+from enum import Enum
+from dataclasses import dataclass
 
+class OptimizerType(Enum):
+    SGDA = "sgda"
 
-from abc import ABC, abstractmethod
+@dataclass
+class OptimizerOptions:
+    optimizer_type: OptimizerType = OptimizerType.SGDA
+    lr: float = 1e-2
 
-
-class Optimizer(ABC):
-    def __init__(self, game: Game) -> None:
-        super().__init__()
-        self.game = game
-
-    @abstractmethod
-    def update(self) -> None:
-        pass
-
-    def step(self) -> None:
-        update = self.update()
-        self.game.update_parameters(update)
+def load_optimizer(game: Game, options: OptimizerOptions = OptimizerOptions()) -> Optimizer:
+    if options.optimizer_type == OptimizerType.SGDA:
+        return SGDA(game, options.lr)
