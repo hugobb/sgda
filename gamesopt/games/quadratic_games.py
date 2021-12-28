@@ -2,10 +2,10 @@ from .base import Game
 import torch
 import math
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
-def make_random_matrix(num_samples: int, dim: int, mu=0., L=1., max_im=1.) -> torch.Tensor:
+def make_random_matrix(num_samples: int, dim: int, mu=0, L=1., max_im=1.) -> torch.Tensor:
     if isinstance(L, float):
         L_min = L
         L_max = L
@@ -52,6 +52,7 @@ class QuadraticGameConfig:
     dim: int = 2
     num_players: int = 2
     bias: bool = True
+    matrix: Optional[torch.Tensor] = None
 
 
 class QuadraticGame(Game):
@@ -61,10 +62,16 @@ class QuadraticGame(Game):
         super().__init__(players)
 
         self.num_samples = config.num_samples
-        self.matrix = make_random_matrix(config.num_samples, config.num_players*config.dim)
+        
+        if config.matrix is None:
+            self.matrix = make_random_matrix(config.num_samples, config.num_players*config.dim) 
+        else:
+            self.matrix = config.matrix
+
         self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self.dim))
+
         self.optimum = self.solve()   
 
     def reset(self) -> None:
@@ -83,18 +90,18 @@ class QuadraticGame(Game):
             _loss = self.bias[i, index]
             for j in range(self.num_players):
                 _loss += (self.matrix[index, i*self.dim:(i+1)*self.dim, j*self.dim:(j+1)*self.dim]*self.players[j].view(1,1,-1)).sum(-1)
-            _loss = self.players[i].view(1, -1).sum(-1).mean()
+            _loss = (_loss*self.players[i].view(1, -1)).sum(-1).mean()
             loss.append(_loss)
         return loss
 
-    def dist2opt(self) -> int:
+    def dist2opt(self) -> float:
         d = 0
         for i in range(self.num_players):
             d += ((self.players[i] - self.optimum[i]) ** 2).sum()
-        return int(d)
+        return float(d)
 
     def solve(self) -> List[torch.Tensor]:
-        b = self.bias.mean(1).view(-1)
+        b = torch.cat([self.bias[0], self.bias[1]], dim=-1).mean(0)
         sol = torch.linalg.solve(self.matrix.mean(0), -b)
         sol = sol.split(self.num_players)
         return sol

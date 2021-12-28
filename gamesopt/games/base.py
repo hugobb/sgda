@@ -21,7 +21,7 @@ class Game(ABC):
 
         return grad
 
-    def hamiltonian(self) -> int:
+    def hamiltonian(self) -> float:
         index = self.sample_batch()
         grad = self.operator(index)
 
@@ -30,7 +30,7 @@ class Game(ABC):
             hamiltonian += (g**2).sum()
         hamiltonian /= 2
 
-        return int(hamiltonian)
+        return float(hamiltonian)
 
     def sample_batch(self) -> None:
         return None
