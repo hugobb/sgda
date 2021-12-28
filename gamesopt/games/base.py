@@ -16,7 +16,7 @@ class Game(ABC):
         loss = self.loss(index)
         grad = []
         for i in range(self.num_players):
-            _grad = autograd.grad(loss[i], self.players[i], retain_graph=True)
+            _grad = autograd.grad(loss[i], self.players[i], retain_graph=True)[0]
             grad.append(_grad)
 
         return grad
@@ -27,8 +27,7 @@ class Game(ABC):
 
         hamiltonian = 0
         for g in grad:
-            for _g in g:
-                hamiltonian += (_g**2).sum()
+            hamiltonian += (g**2).sum()
         hamiltonian /= 2
 
         return int(hamiltonian)

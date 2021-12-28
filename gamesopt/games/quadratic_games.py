@@ -5,8 +5,40 @@ from dataclasses import dataclass
 from typing import List
 
 
-def make_random_matrix(num_samples: int, dim: int) -> torch.Tensor:
-    return torch.zeros(num_samples, dim, dim).normal_()
+def make_random_matrix(num_samples: int, dim: int, mu=0., L=1., max_im=1.) -> torch.Tensor:
+    if isinstance(L, float):
+        L_min = L
+        L_max = L
+    elif len(L) == 2:
+        L_min = L[0]
+        L_max = L[1]
+    else:
+        raise ValueError()
+
+    matrix = torch.randn(num_samples, dim, dim)
+    _, matrix = torch.linalg.eig(matrix)
+    
+    L_i = torch.rand(num_samples, 1)
+    L_i = (L_i - L_i.min()) / (L_i.max() - L_i.min())
+    L_i = L_min + L_i * (L_max - L_min)
+
+    real_part = torch.rand(num_samples, dim)
+    real_part = (real_part - real_part.min()) / (real_part.max() - real_part.min())
+    real_part = mu + real_part * (L_i - mu)
+    
+    im_part = torch.rand(num_samples, dim)
+    im_part = (im_part - im_part.min()) / (im_part.max() - im_part.min())
+    im_part = (2*im_part - 1)*max_im
+
+    eigs = torch.complex(real_part, im_part)
+
+    matrix = torch.matmul(matrix, torch.matmul(eigs.diag_embed(), matrix.inverse())).real
+    matrix[:, :dim, :dim] = 0.5*(matrix[:, :dim, :dim].transpose(-1, -2) + matrix[:, :dim, :dim])
+    matrix[:, dim:, dim:] = 0.5*(matrix[:, dim:, dim:].transpose(-1, -2) + matrix[:, dim:, dim:])
+    
+    s = torch.linalg.eigvals(matrix)
+    return matrix
+
 
 def random_vector(dim: int) -> torch.Tensor:
     x = torch.zeros(dim).normal_() / math.sqrt(dim)

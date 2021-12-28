@@ -12,6 +12,5 @@ class SGDA(Optimizer):
         grad = self.game.operator(index)
         
         for i in range(self.game.num_players):
-            for p, g in zip(self.game.players[i], grad[i]):
-                p = p - self.lr*g
+            self.game.players[i] = self.game.players[i] - self.lr*grad[i]
             
