@@ -19,8 +19,8 @@ class OptimizerOptions:
     p: Optional[float] = None
 
 
-def load_optimizer(game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Callable[[torch.Tensor], torch.Tensor] = lambda x : x) -> Optimizer:
+def load_optimizer(game: Game, options: OptimizerOptions = OptimizerOptions()) -> Optimizer:
     if options.optimizer_type == OptimizerType.PROX_SGDA:
-        return ProxSGDA(game, options.lr, prox)
+        return ProxSGDA(game, options.lr)
     elif options.optimizer_type == OptimizerType.PROX_SVRGDA:
-        return ProxSVRGDA(game, options.lr, options.p, prox)
+        return ProxSVRGDA(game, options.lr, options.p)

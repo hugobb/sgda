@@ -1,6 +1,8 @@
 import unittest
+from gamesopt import games
 from gamesopt.games import QuadraticGame
 from gamesopt.games import KellyAuction
+from gamesopt.games.robust_regression import RobustLinReg
 
 
 class TestGames(unittest.TestCase):
@@ -17,6 +19,14 @@ class TestGames(unittest.TestCase):
 
     def test_kelly_auction(self):
         game = KellyAuction()
+        game.reset()
+        game.loss()
+        game.operator()
+        game.hamiltonian()
+
+    def test_robust(self):
+        game = RobustLinReg()
+        game.reset()
         game.loss()
         game.operator()
         game.hamiltonian()

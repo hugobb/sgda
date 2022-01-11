@@ -55,3 +55,6 @@ class Game(ABC):
 
     def sample(self, n: int = 1) -> None:
         return None
+
+    def prox(self, x: torch.Tensor) -> torch.Tensor:
+        return x

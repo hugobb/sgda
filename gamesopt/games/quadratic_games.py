@@ -1,4 +1,5 @@
 from .base import Game
+from .utils import random_vector
 import torch
 import math
 from dataclasses import dataclass
@@ -40,12 +41,6 @@ def make_random_matrix(num_samples: int, dim: int, mu: float = 0, L: float = 1.,
     return matrix
 
 
-def random_vector(dim: int) -> torch.Tensor:
-    x = torch.zeros(dim).normal_() / math.sqrt(dim)
-    x.requires_grad_()
-    return x
-
-
 @dataclass
 class QuadraticGameConfig:
     num_samples: int = 10
@@ -70,7 +65,9 @@ class QuadraticGame(Game):
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self.dim))
 
-        self.optimum = self.solve()   
+        self.optimum = self.solve()
+
+        self.reset()   
 
     def reset(self) -> None:
         for i in range(self.num_players):

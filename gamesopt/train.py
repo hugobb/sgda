@@ -29,6 +29,5 @@ def train(config: TrainConfig = TrainConfig()) -> Dict[str, List[float]]:
             index = game.sample(config.batch_size)
         optimizer.step(index)
         metrics["hamiltonian"].append(game.hamiltonian())
-        metrics["dist2opt"].append(game.dist2opt())
 
     return metrics
