@@ -1,10 +1,10 @@
-from typing import Callable, Optional
+from typing import Optional, Union
+from .lr import FixedLR, LRScheduler
 from .base import Optimizer
 from .sgda import ProxSGDA, ProxSVRGDA
 from gamesopt.games import Game
 from enum import Enum
 from dataclasses import dataclass
-import torch
 
 
 class OptimizerType(Enum):
@@ -15,8 +15,12 @@ class OptimizerType(Enum):
 @dataclass
 class OptimizerOptions:
     optimizer_type: OptimizerType = OptimizerType.PROX_SGDA
-    lr: float = 1e-2
+    lr: Union[float, LRScheduler] = 1e-2
     p: Optional[float] = None
+
+    def __post_init__(self):
+        if isinstance(self.lr, float):
+            self.lr = FixedLR(self.lr)
 
 
 def load_optimizer(game: Game, options: OptimizerOptions = OptimizerOptions()) -> Optimizer:

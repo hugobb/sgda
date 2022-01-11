@@ -1,4 +1,4 @@
-# Code for "Stochastic Algorithms for VI problems:  Unified Theoryand New Efficient Methods"
+# Code for "Stochastic Algorithms for VI problems:  Unified Theory and New Efficient Methods"
 
 ## Requirements
 - `torch`
