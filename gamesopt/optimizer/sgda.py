@@ -38,9 +38,9 @@ class ProxSVRGDA(ProxSGDA):
             update = grad[i] - grad_copy[i] + self.full_grad[i]
             self.game.players[i] = self.prox(self.game.players[i] - self.lr*update)
 
-        if not self.p.bernouilli_():
+        if not self.p.bernoulli_():
             self.update_state()
 
     def update_state(self) -> None:
-        self.game_copy = deepcopy(self.game)
+        self.game_copy = self.game.copy()
         self.full_grad = self.game_copy.full_operator()

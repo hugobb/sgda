@@ -13,6 +13,7 @@ class TestGames(unittest.TestCase):
         game.operator(index)
         game.hamiltonian()
         game.dist2opt()
+        game.copy()
 
     def test_kelly_auction(self):
         game = KellyAuction()

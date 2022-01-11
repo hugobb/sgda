@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import torch.autograd as autograd
 import torch
 from typing import List, Optional
+import copy
 
 
 class Game(ABC):
@@ -13,6 +14,14 @@ class Game(ABC):
     @abstractmethod
     def reset(self) -> None:
         pass
+
+    def copy(self):
+        players = []
+        for i in range(self.num_players):
+            players.append(self.players[i].clone())
+        game = copy.copy(self)
+        game.players = players
+        return game
 
     def loss(self, index: Optional[int] = None):
         raise NotImplementedError("You need to overwrite either `loss` or `operator`, when inheriting `Game`.")
