@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Optional, Tuple, Union, NewType
 from gamesopt.games import Game
 from enum import Enum
 from dataclasses import dataclass
@@ -11,10 +11,13 @@ class OptimizerType(Enum):
     PROX_SGDA = "prox_sgda"
 
 
+LRSchedulerType = Union[float, LRScheduler]
+
 @dataclass
 class OptimizerOptions:
     optimizer_type: OptimizerType = OptimizerType.PROX_SGDA
-    lr: Union[float, LRScheduler] = 1e-2
+    lr:  Union[LRSchedulerType, Tuple[LRSchedulerType, ...]] = 1e-2
+    lr_e:  Optional[Union[LRSchedulerType, Tuple[LRSchedulerType, ...]]] = None
     p: Optional[float] = None
     update_scheme: UpdateType = UpdateType.GRADIENT
 

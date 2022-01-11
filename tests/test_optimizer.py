@@ -1,6 +1,7 @@
 import unittest
 from gamesopt.optimizer import ProxSGDA
 from gamesopt.games import QuadraticGame
+from gamesopt.optimizer.extragradient import Extragradient
 from gamesopt.optimizer.lr import DecreasingLR, FixedLR
 from gamesopt.optimizer.vr import GradientUpdate, SVRG, LooplessSVRG
 
@@ -29,6 +30,12 @@ class TestOptimizer(unittest.TestCase):
     def test_sgda(self):
         game = QuadraticGame()
         optimizer = ProxSGDA(game)
+        index = game.sample()
+        optimizer.step(index)
+
+    def test_extragradient(self):
+        game = QuadraticGame()
+        optimizer = Extragradient(game)
         index = game.sample()
         optimizer.step(index)
 
