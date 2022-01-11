@@ -26,5 +26,5 @@ def load_game(options: GameOptions = GameOptions()) -> Game:
     elif options.game_type == GameType.KELLY_AUCTION:
         return KellyAuction(options.kelly_auction_options)
     elif options.game_type == GameType.ROBUST_LINEAR_REG:
-        return RobustLinRegConfig(options.robust_linear_reg_options)
+        return RobustLinReg(options.robust_linear_reg_options)
 
