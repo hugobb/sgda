@@ -5,9 +5,14 @@ from typing import List, Optional
 
 
 class Game(ABC):
-    def __init__(self, players: List[torch.Tensor]) -> None:
+    def __init__(self, players: List[torch.Tensor], num_samples: int) -> None:
         self.num_players = len(players)
         self.players = players
+        self.num_samples = num_samples
+
+    @abstractmethod
+    def reset(self) -> None:
+        pass
 
     def loss(self, index: Optional[int] = None):
         raise NotImplementedError("You need to overwrite either `loss` or `operator`, when inheriting `Game`.")
@@ -20,6 +25,10 @@ class Game(ABC):
             grad.append(_grad)
 
         return grad
+
+    def full_operator(self) -> List[List[torch.Tensor]]:
+        index = self.sample_batch()
+        return self.operator(index)
 
     def hamiltonian(self) -> float:
         index = self.sample_batch()

@@ -14,13 +14,13 @@ class KellyAuction(Game):
     def __init__(self, config: KellyAuctionConfig = KellyAuctionConfig()) -> None:
         N = len(config.marginal_utility_gains)
         players = [torch.zeros(1, requires_grad=True) for _ in range(N)]
-        super().__init__(players)
+        super().__init__(players, 1)
 
         self.Q = config.ressources
         self.Z = config.bidding_cost
         self.G = config.marginal_utility_gains
 
-    def reset(self):
+    def reset(self) -> None:
         return [torch.zeros(1, requires_grad=True) for _ in range(self.num_players)]
 
     def loss(self, index: Optional[int] = None) -> List[torch.Tensor]:

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 
-def make_random_matrix(num_samples: int, dim: int, mu=0, L=1., max_im=1.) -> torch.Tensor:
+def make_random_matrix(num_samples: int, dim: int, mu: float = 0, L: float = 1., max_im: float = 1.) -> torch.Tensor:
     if isinstance(L, float):
         L_min = L
         L_max = L
@@ -59,9 +59,7 @@ class QuadraticGame(Game):
     def __init__(self, config: QuadraticGameConfig = QuadraticGameConfig()) -> None:
         self.dim = config.dim
         players = [torch.zeros(self.dim, requires_grad=True), torch.zeros(self.dim, requires_grad=True)]
-        super().__init__(players)
-
-        self.num_samples = config.num_samples
+        super().__init__(players, config.num_samples)
         
         if config.matrix is None:
             self.matrix = make_random_matrix(config.num_samples, config.num_players*config.dim) 
