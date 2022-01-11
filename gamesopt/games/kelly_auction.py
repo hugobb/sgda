@@ -33,3 +33,4 @@ class KellyAuction(Game):
 
         return loss
 
+

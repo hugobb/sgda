@@ -28,12 +28,10 @@ class Game(ABC):
 
     def operator(self, index: Optional[int] = None) -> List[List[torch.Tensor]]:
         loss = self.loss(index)
-        grad = []
-        for i in range(self.num_players):
-            _grad = autograd.grad(loss[i], self.players[i], retain_graph=True)[0]
-            grad.append(_grad)
+        return map(self.grad, loss, self.players)
 
-        return grad
+    def grad(self, loss, player):
+        return autograd.grad(loss, player, retain_graph=True)[0]
 
     def full_operator(self) -> List[List[torch.Tensor]]:
         index = self.sample_batch()
@@ -58,3 +56,6 @@ class Game(ABC):
 
     def prox(self, x: torch.Tensor) -> torch.Tensor:
         return x
+
+    def update_players(self, players: List[torch.Tensor]) -> None:
+        self.players = players

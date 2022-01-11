@@ -1,12 +1,43 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Union
 from gamesopt.games import Game
+from enum import Enum
+from dataclasses import dataclass
+from .lr import LRScheduler, FixedLR
+from .vr import SVRG, GradientUpdate, LooplessSVRG, UpdateType
+
+
+class OptimizerType(Enum):
+    PROX_SGDA = "prox_sgda"
+
+
+@dataclass
+class OptimizerOptions:
+    optimizer_type: OptimizerType = OptimizerType.PROX_SGDA
+    lr: Union[float, LRScheduler] = 1e-2
+    p: Optional[float] = None
+    update_scheme: UpdateType = UpdateType.GRADIENT
+
+    def __post_init__(self):
+        if isinstance(self.lr, float):
+            self.lr = FixedLR(self.lr)
+
+
+def load_update_scheme(game, options: OptimizerOptions):
+    if options.update_scheme == UpdateType.GRADIENT:
+        return GradientUpdate(game)
+    elif options.update_scheme == UpdateType.SVRG:
+        return SVRG(game)
+    elif options.update_scheme == UpdateType.L_SVRG:
+        return LooplessSVRG(game, options.p)
 
 
 class Optimizer(ABC):
-    def __init__(self, game: Game) -> None:
+    def __init__(self, game: Game, options: OptimizerOptions) -> None:
         self.game = game
         self.k = 0
+
+        self.update = load_update_scheme(game, options) 
 
     @abstractmethod
     def step(self, index: Optional[int] = None) -> None:
