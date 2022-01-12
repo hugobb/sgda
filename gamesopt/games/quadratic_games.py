@@ -98,5 +98,5 @@ class QuadraticGame(Game):
     def solve(self) -> List[torch.Tensor]:
         b = torch.cat([self.bias[0], self.bias[1]], dim=-1).mean(0)
         sol = torch.linalg.solve(self.matrix.mean(0), -b)
-        sol = sol.split(self.num_players)
+        sol = torch.split(sol, self.num_players)
         return sol

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 import torch.autograd as autograd
 import torch
-from typing import List, Optional
+from typing import List, Optional, Union
 import copy
 
 
@@ -26,12 +27,15 @@ class Game(ABC):
     def loss(self, index: Optional[int] = None):
         raise NotImplementedError("You need to overwrite either `loss` or `operator`, when inheriting `Game`.")
 
-    def operator(self, index: Optional[int] = None) -> List[List[torch.Tensor]]:
+    def operator(self, index: Optional[int] = None, player_index: Optional[int] = None) -> Union[torch.Tensor, Iterator[torch.Tensor]]:
         loss = self.loss(index)
-        return map(self.grad, loss, self.players)
+        if player_index is None:
+            return map(self.grad, loss, range(self.num_players))
+        else:
+            return self.grad(loss[player_index], player_index)
 
-    def grad(self, loss, player):
-        return autograd.grad(loss, player, retain_graph=True)[0]
+    def grad(self, loss: torch.Tensor, index: int) -> torch.Tensor:
+        return autograd.grad(loss, self.players[index], retain_graph=True)[0]
 
     def full_operator(self) -> List[List[torch.Tensor]]:
         index = self.sample_batch()
@@ -48,10 +52,10 @@ class Game(ABC):
 
         return float(hamiltonian)
 
-    def sample_batch(self) -> None:
+    def sample_batch(self) -> Optional[torch.Tensor]:
         return None
 
-    def sample(self, n: int = 1) -> None:
+    def sample(self, n: int = 1) -> Optional[torch.Tensor]:
         return None
 
     def prox(self, x: torch.Tensor) -> torch.Tensor:
