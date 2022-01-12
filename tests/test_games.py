@@ -2,6 +2,7 @@ import unittest
 from gamesopt import games
 from gamesopt.games import QuadraticGame
 from gamesopt.games import KellyAuction
+from gamesopt.games.bilinear import BilinearGame
 from gamesopt.games.robust_regression import RobustLinReg
 
 
@@ -30,3 +31,12 @@ class TestGames(unittest.TestCase):
         game.loss()
         game.operator()
         game.hamiltonian()
+
+    def test_bilinear(self):
+        game = BilinearGame()
+        game.reset()
+        index = game.sample()
+        game.loss(index)
+        game.operator(index)
+        game.hamiltonian()
+        game.dist2opt()
