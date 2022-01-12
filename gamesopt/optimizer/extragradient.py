@@ -45,12 +45,12 @@ class EGwithVR(Optimizer):
         mean_players = []
         for i, g in enumerate(self.update.full_grad):
             mean = self.alpha*self.game.players[i] + (1-self.alpha)*self.update.game_copy.players[i]
-            self.game.players[i] = mean - self.lr(self.k)*g
+            self.game.players[i] = self.game.prox(mean - self.lr(self.k)*g)
             mean_players.append(mean)
 
         grad = self.update.grad(index)
         for i, g in enumerate(grad):
-            self.game.players[i] = mean_players[i] - self.lr(self.k)*g
+            self.game.players[i] = self.game.prox(mean_players[i] - self.lr(self.k)*g)
     
         self.update.update_state()
 

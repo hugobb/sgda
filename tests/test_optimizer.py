@@ -4,7 +4,7 @@ from gamesopt.games import QuadraticGame
 from gamesopt.optimizer.base import OptimizerOptions
 from gamesopt.optimizer.extragradient import EGwithVR, Extragradient
 from gamesopt.optimizer.lr import DecreasingLR, FixedLR
-from gamesopt.optimizer.vr import GradientUpdate, SVRG, LooplessSVRG, UpdateType
+from gamesopt.optimizer.vr import GradientUpdate, SVRG, LooplessSVRG, UpdateType, VRFoRB
 
 class TestOptimizer(unittest.TestCase):
 
@@ -28,6 +28,13 @@ class TestOptimizer(unittest.TestCase):
         update.grad(index)
         update.update_state()
 
+    def test_vr_forb(self):
+        game = QuadraticGame()
+        update = VRFoRB(game)
+        index = game.sample()
+        update.grad(index)
+        update.update_state()
+
     def test_sgda(self):
         game = QuadraticGame()
         optimizer = ProxSGDA(game)
@@ -42,7 +49,8 @@ class TestOptimizer(unittest.TestCase):
 
     def test_eg_with_vr(self):
         game = QuadraticGame()
-        options = OptimizerOptions(update_scheme=UpdateType.L_SVRG)
+        options = OptimizerOptions()
+        options.update_scheme_options.update_scheme = UpdateType.L_SVRG
         optimizer = EGwithVR(game, options)
         index = game.sample()
         optimizer.step(index)

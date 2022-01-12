@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import torch
 from gamesopt.games import Game
 from typing import List, Optional
@@ -7,11 +8,31 @@ class UpdateType(Enum):
     GRADIENT = "gradient"
     SVRG = "SVRG"
     L_SVRG = "L-SVRG"
+    VR_FORB = "VR-FoRB"
+
+
+@dataclass
+class UpdateSchemeOptions:
+    update_scheme: UpdateType = UpdateType.GRADIENT
+    p: Optional[float] = None
+
+
+def load_update_scheme(game: Game, options: UpdateSchemeOptions):
+    if options.update_scheme == UpdateType.GRADIENT:
+        return GradientUpdate(game)
+    elif options.update_scheme == UpdateType.SVRG:
+        return SVRG(game)
+    elif options.update_scheme == UpdateType.L_SVRG:
+        return LooplessSVRG(game, options.p)
+    elif options.update_scheme == UpdateType.VR_FORB:
+        return VRFoRB(game)
 
 
 class GradientUpdate:
     def __init__(self, game: Game) -> None:
         self.game = game
+        self.game_copy = None
+        self.full_grad = None
 
     def _update_state(self) -> None:
         pass
@@ -64,3 +85,26 @@ class LooplessSVRG(SVRG):
     def update_state(self) -> None:
         if not self.p.bernoulli_():
             self._update_state()
+
+
+class VRFoRB(LooplessSVRG):
+    def __init__(self, game: Game, p: Optional[float] = None) -> None:
+        super().__init__(game)
+        if p is None:
+            p = 1/game.num_samples
+        self.p = torch.as_tensor(p)
+        self._update_state()
+
+    def _update_state(self) -> None:
+        if self.game_copy is None:
+            self.game_previous = self.game.copy()
+        else:
+            self.game_previous = self.game_copy.copy()
+
+        super()._update_state()
+
+    def grad(self, index: int) -> List[torch.Tensor]:
+        grad = super().grad(index)
+        grad_copy = self.game_previous.operator(index)
+
+        return map(self._grad, grad, grad_copy, self.full_grad)
