@@ -1,4 +1,4 @@
-from gamesopt.games import Game
+from .base import Game
 from typing import Optional, Tuple, List
 from dataclasses import dataclass
 import torch

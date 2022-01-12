@@ -1,4 +1,4 @@
-from gamesopt.games.bilinear import BilinearGame, BilinearGameConfig
+from .bilinear import BilinearGame, BilinearGameConfig
 from .robust_regression import RobustLinRegConfig, RobustLinReg
 from .base import Game
 from .quadratic_games import QuadraticGame, QuadraticGameConfig

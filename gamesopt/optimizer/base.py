@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union, NewType
+from typing import Optional, Tuple, Union
 from gamesopt.games import Game
 from enum import Enum
 from dataclasses import dataclass
@@ -9,6 +9,8 @@ from .vr import SVRG, GradientUpdate, LooplessSVRG, UpdateType
 
 class OptimizerType(Enum):
     PROX_SGDA = "prox_sgda"
+    EXTRAGRADIENT = "extragradient"
+    EG_WITH_VR = "eg_with_vr"
 
 
 LRSchedulerType = Union[float, LRScheduler]
@@ -20,6 +22,7 @@ class OptimizerOptions:
     lr_e:  Optional[Union[LRSchedulerType, Tuple[LRSchedulerType, ...]]] = None
     p: Optional[float] = None
     update_scheme: UpdateType = UpdateType.GRADIENT
+    alpha: float = 0.
 
     def __post_init__(self):
         if isinstance(self.lr, float):

@@ -48,10 +48,9 @@ class SVRG(GradientUpdate):
     def grad(self, index: int) -> List[torch.Tensor]:
         grad = super().grad(index)
         grad_copy = self.game_copy.operator(index)
-        full_grad = self.game_copy.full_operator()
 
-        return map(self._grad, grad, grad_copy, full_grad)
-
+        return map(self._grad, grad, grad_copy, self.full_grad)
+        
 
 class LooplessSVRG(SVRG):
     def __init__(self, game: Game, p: Optional[float] = None) -> None:

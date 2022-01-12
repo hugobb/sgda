@@ -1,6 +1,6 @@
 from .base import Optimizer, OptimizerOptions
 from gamesopt.games import Game
-from typing import List, Optional
+from typing import Optional
 
 
 class ProxSGDA(Optimizer):
