@@ -9,8 +9,9 @@ class ProxSGDA(Optimizer):
         index = self.sample()
         grad = self.game.operator(index)
         
-        for i, g in enumerate(grad):
+        for i in range(self.game.num_players):
             lr = self.lr(self.k)
+            g = self.game.unflatten(i, grad)
             self.game.players[i] = self.prox(self.game.players[i] - lr*g, lr)
 
         self.k += 1
@@ -40,11 +41,12 @@ class ProxLSVRGDA(Optimizer):
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
+        update = grad - grad_copy + self.full_grad
         
-        for i in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+        for i in range(self.game.num_players):    
+            g = self.game.unflatten(i, update)
             lr = self.lr(self.k)
-            self.game.players[i] = self.prox(self.game.players[i] - lr*(update), lr)
+            self.game.players[i] = self.prox(self.game.players[i] - lr*g, lr)
 
         if torch.bernoulli(self.p):
             self.set_state()
@@ -75,11 +77,12 @@ class VRFoRB(Optimizer):
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_previous.operator(index)
+        update = grad - grad_copy + self.full_grad
         
         for i in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            g = self.game.unflatten(i, update)
             lr = self.lr(self.k)
-            self.game.players[i] = self.prox(self.game.players[i] - lr*update, lr)
+            self.game.players[i] = self.prox(self.game.players[i] - lr*g, lr)
 
         if torch.bernoulli(self.p):
             self.set_state()
@@ -99,7 +102,6 @@ class SVRG(Optimizer):
         if self.N is None:
             self.N = game.num_samples
         
-
         self.set_state()
 
     def set_state(self) -> None:
@@ -111,17 +113,17 @@ class SVRG(Optimizer):
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
+        update = grad - grad_copy + self.full_grad
         
         for i in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            g = self.game.unflatten(i, update)
             lr = self.lr[i](self.k)
-            self.game.players[i] = self.prox(self.game.players[i] - lr*update, lr)
+            self.game.players[i] = self.prox(self.game.players[i] - lr*g, lr)
 
         self.num_grad += 2*len(index)
         self.k += 1
         if (self.k % self.N) == 0:
             self.set_state()
-
         
 
 class VRAGDA(Optimizer):
@@ -151,11 +153,11 @@ class VRAGDA(Optimizer):
             index = self.sample()
             grad = self._game.operator(index, i)
             grad_copy = self.game_copy.operator(index, i)
-            self._game.players[i] = self._game.players[i] - self.lr[i](self.k)*(grad - grad_copy + self.full_grad[i])
+            fg = self.game.unflatten(i, self.full_grad)
+            self._game.players[i] = self._game.players[i] - self.lr[i](self.k)*(grad - grad_copy + fg)
 
         if torch.bernoulli(self.p / ((self.k % (self.T*self.N)) + 2)):
             self.game.set_players(self._game.players)
-
 
         self.num_grad += 2*len(index)
         self.k += 1

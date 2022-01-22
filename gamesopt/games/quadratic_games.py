@@ -80,7 +80,7 @@ class QuadraticGame(Game):
         torch.save({"config": self.config, "players": self.players, "matrix": self.matrix, "bias": self.bias}, filename)
 
     @staticmethod
-    def load(self, filename: Path):
+    def load(filename: Path):
         checkpoint = torch.load(filename)
         game = QuadraticGame(checkpoint["config"])
         game.players = checkpoint["players"]

@@ -47,7 +47,7 @@ class OptimizerOptions:
 
 
 class Optimizer(ABC):
-    def __init__(self, game: Game, options: OptimizerOptions) -> None:
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
         self.game: Game = game
         self.k = 0
         self.lr = options.lr

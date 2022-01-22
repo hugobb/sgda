@@ -86,8 +86,11 @@ class Game(ABC):
     def update_players(self, players: List[torch.Tensor]) -> None:
         self.players = players
 
-    @abstractmethod
     def save(self, filename: Path) -> None:
+        pass
+
+    @staticmethod
+    def load(filename: Path):
         pass
 
     def dist(self, game) -> float:

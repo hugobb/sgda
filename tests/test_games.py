@@ -15,7 +15,6 @@ class TestGames(unittest.TestCase):
         game.loss(index)
         game.operator(index)
         game.hamiltonian()
-        game.dist2opt()
         game.copy()
 
     def test_kelly_auction(self):

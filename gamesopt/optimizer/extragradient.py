@@ -27,18 +27,20 @@ class SVRE(Optimizer):
         game_copy = self.game.copy()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
+        update = grad - grad_copy + self.full_grad
         for i in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
-            self.game.players[i] = self.game.players[i] - self.lr[i](self.k)*update
+            g = self.game.unflatten(i, update)
+            self.game.players[i] = self.game.players[i] - self.lr[i](self.k)*g
 
         self.num_grad += 2*len(index)
 
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
+        update = grad - grad_copy + self.full_grad
         for i in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
-            self.game.players[i] = game_copy.players[i] - self.lr[i](self.k)*update
+            g = self.game.unflatten(i, update)
+            self.game.players[i] = game_copy.players[i] - self.lr[i](self.k)*g
     
         self.num_grad += 2*len(index)
         self.k += 1
@@ -68,16 +70,18 @@ class EGwithVR(Optimizer):
         for i in range(self.game.num_players):
             mean = self.alpha*self.game.players[i] + (1-self.alpha)*(self.game_copy.players[i])
             lr = self.lr(self.k)
-            self.game.players[i] = self.prox(mean - lr*self.full_grad[i], lr)
+            g = self.game.unflatten(i, self.full_grad)
+            self.game.players[i] = self.prox(mean - lr*g, lr)
             mean_players.append(mean)
 
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
+        update = grad - grad_copy + self.full_grad
         for i  in range(self.game.num_players):
-            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            g = self.game.unflatten(i, update)
             lr = self.lr(self.k)
-            self.game.players[i] = self.prox(mean_players[i] - lr*update, lr)
+            self.game.players[i] = self.prox(mean_players[i] - lr*g, lr)
 
         self.num_grad += 2*len(index)
     
