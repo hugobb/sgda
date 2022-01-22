@@ -20,20 +20,27 @@ class SVRE(Optimizer):
         self.game_copy = self.game.copy()
         self.full_grad = self.game_copy.full_operator()
         self.N.geometric_(self.p)
+        self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         index = self.sample()
         game_copy = self.game.copy()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
-        for lr, p, g, g_copy, f_g  in zip(self.lr, self.game.players, grad, grad_copy, self.full_grad):
-            p = p - lr(self.k)*(g - g_copy + f_g)
+        for i in range(self.game.num_players):
+            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            self.game.players[i] = self.game.players[i] - self.lr[i](self.k)*update
+
+        self.num_grad += 2*len(index)
 
         index = self.sample()
         grad = self.game.operator(index)
-        for lr, p, p_copy, g, g_copy, f_g  in zip(self.lr, self.game.players, game_copy.players, grad, grad_copy, self.full_grad):
-            p = p_copy - lr(self.k)*(g - g_copy + f_g)
+        grad_copy = self.game_copy.operator(index)
+        for i in range(self.game.num_players):
+            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            self.game.players[i] = game_copy.players[i] - self.lr[i](self.k)*update
     
+        self.num_grad += 2*len(index)
         self.k += 1
         if (self.k % self.N) == 0:
             self.set_state()
@@ -44,30 +51,37 @@ class EGwithVR(Optimizer):
         super().__init__(game, options)
         self.alpha = options.alpha
 
-        if options.p is None:
-            options.p = 1/game.num_samples
-        self.p = torch.as_tensor(options.p)
+        self.p = options.p
+        if self.p is None:
+            self.p = 1/game.num_samples
+        self.p = torch.as_tensor(self.p)
 
         self.set_state()    
 
     def set_state(self):
         self.game_copy = self.game.copy()
         self.full_grad = self.game.full_operator()
+        self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         mean_players = []
-        for i, g in enumerate(self.full_grad):
+        for i in range(self.game.num_players):
             mean = self.alpha*self.game.players[i] + (1-self.alpha)*(self.game_copy.players[i])
-            self.game.players[i] = self.game.prox(mean - self.lr(self.k)*g)
+            lr = self.lr(self.k)
+            self.game.players[i] = self.prox(mean - lr*self.full_grad[i], lr)
             mean_players.append(mean)
 
         index = self.sample()
         grad = self.game.operator(index)
         grad_copy = self.game_copy.operator(index)
-        for i, (mean_p, g, g_copy, full_g) in enumerate(zip(self.game.players, mean_players, grad, grad_copy, self.full_grad)):
-            self.game.players[i] = self.game.prox(mean_p - self.lr(self.k)*(g - g_copy + full_g))
+        for i  in range(self.game.num_players):
+            update = (grad[i] - grad_copy[i] + self.full_grad[i])
+            lr = self.lr(self.k)
+            self.game.players[i] = self.prox(mean_players[i] - lr*update, lr)
+
+        self.num_grad += 2*len(index)
     
-        if self.p.bernoulli_():
+        if torch.bernoulli(self.p):
             self.set_state()
 
         self.k += 1

@@ -1,5 +1,5 @@
 from .bilinear import BilinearGame, BilinearGameConfig
-from .robust_regression import RobustLinRegConfig, RobustLinReg
+from .robust_regression import RobustLinRegConfig, RobustLinReg, RobustLogReg
 from .base import Game
 from .quadratic_games import QuadraticGame, QuadraticGameConfig
 from .kelly_auction import KellyAuction, KellyAuctionConfig
@@ -12,6 +12,7 @@ class GameType(Enum):
     KELLY_AUCTION = "kelly_auction"
     ROBUST_LINEAR_REG = "robust_linear_reg"
     BILINEAR = "bilinear"
+    ROBUST_LOGISTIC_REG = "robust_logistic_regression"
 
 
 @dataclass
@@ -32,4 +33,8 @@ def load_game(options: GameOptions = GameOptions()) -> Game:
         return RobustLinReg(options.robust_linear_reg_options)
     elif options.game_type == GameType.BILINEAR:
         return BilinearGame(options.bilinear_options)
+    elif options.game_type == GameType.ROBUST_LOGISTIC_REG:
+        return RobustLogReg()
+    else:
+        raise ValueError()
 

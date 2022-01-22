@@ -3,8 +3,12 @@ from typing import Optional, Tuple, Union
 from gamesopt.games import Game
 from enum import Enum
 from dataclasses import dataclass
+
+from .prox import ProxOptions, load_prox
+from .quantization import QuantizationOptions, load_quantization
 from .lr import LRScheduler, FixedLR
 import torch
+import torch.distributed as dist
 
 
 class OptimizerType(Enum):
@@ -13,8 +17,11 @@ class OptimizerType(Enum):
     SVRG = "SVRG"
     VRFORB = "VR-FoRB"
     VRAGDA = "VR-AGDA"
-    SVRE = "svre"
+    SVRE = "SVRE"
     EG_VR = "EG-VR"
+    QSGDA = "QSGDA"
+    DIANA_SGDA = "DIANA-SGDA"
+    VR_DIANA_SGDA = "VR-DIANA-SGDA"
 
 LRSchedulerType = Union[float, LRScheduler]
 
@@ -27,8 +34,10 @@ class OptimizerOptions:
     alpha: float = 0.
     full_batch: bool = False
     batch_size: int = 1
-    N: int = 1
+    N: Optional[int] = None
     T: int = 1
+    prox_options: ProxOptions = ProxOptions()
+    quantization_options: QuantizationOptions = QuantizationOptions()
 
     def __post_init__(self):
         if isinstance(self.lr, float):
@@ -44,6 +53,13 @@ class Optimizer(ABC):
         self.lr = options.lr
         self.batch_size = options.batch_size
         self.full_batch = options.full_batch
+        self.num_grad = 0
+
+        self.prox = load_prox(options.prox_options)
+        self.quantization = load_quantization(options.quantization_options)
+
+        if isinstance(self.lr, float):
+            self.lr = FixedLR(self.lr)
 
     def sample(self) -> Optional[torch.Tensor]:
         if self.full_batch:
@@ -54,3 +70,19 @@ class Optimizer(ABC):
     @abstractmethod
     def step(self) -> None:
         pass
+
+class DistributedOptimizer(Optimizer):
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
+        super().__init__(game, options)
+        self.size = int(dist.get_world_size())
+        self.n_bits = 0
+    
+    def get_num_grad(self) -> int:
+        num_grad = torch.tensor([self.num_grad])
+        dist.all_reduce(num_grad)
+        return int(num_grad)
+
+    def get_n_bits(self) -> int:
+        n_bits = torch.tensor([self.n_bits])
+        dist.all_reduce(n_bits)
+        return int(n_bits)

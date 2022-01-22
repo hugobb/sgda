@@ -3,6 +3,7 @@ from.optimizer import load_optimizer, OptimizerOptions
 from dataclasses import dataclass
 from collections import defaultdict
 from typing import Dict, List
+from omegaconf import OmegaConf
 import torch
 
 @dataclass
@@ -15,7 +16,6 @@ class TrainConfig:
 
 def train(config: TrainConfig = TrainConfig()) -> Dict[str, List[float]]:
     torch.manual_seed(config.seed)
-    
     game = load_game(config.game)
     optimizer = load_optimizer(game, config.optimizer)
 
@@ -23,5 +23,6 @@ def train(config: TrainConfig = TrainConfig()) -> Dict[str, List[float]]:
     for _ in range(config.num_iter):
         optimizer.step()
         metrics["hamiltonian"].append(game.hamiltonian())
+        metrics["num_grad"].append(optimizer.num_grad)
 
-    return metrics
+    return OmegaConf.create(dict(metrics))
