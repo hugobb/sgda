@@ -1,16 +1,14 @@
+from gamesopt.db import Record
 from .optimizer.base import DistributedOptimizer
 from .games import load_game
 from.optimizer import load_optimizer, OptimizerOptions, OptimizerType
 from dataclasses import dataclass
 from collections import defaultdict
-from typing import Dict, List
-from omegaconf import OmegaConf
 from .train import TrainConfig
 import torch.multiprocessing as mp
 import torch.distributed as dist
 import os
 import torch
-import tempfile
 
 
 @dataclass
@@ -18,7 +16,7 @@ class TrainDistributedConfig(TrainConfig):
     n_process: int = 2
     optimizer: OptimizerOptions = OptimizerOptions(optimizer_type=OptimizerType.QSGDA)
 
-def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), tmp_file = None) -> Dict[str, List[float]]:
+def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> None:
     setup(rank, config.n_process)
     
     game = load_game(config.game)
@@ -37,18 +35,17 @@ def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), tmp_
             metrics["hamiltonian"].append(hamiltonian)
             metrics["num_grad"].append(num_grad)
             metrics["n_bits"].append(n_bits)
-            conf = OmegaConf.create(dict(metrics))
-            OmegaConf.save(config=conf, f=tmp_file)
+            record.save_metrics(metrics)
 
-def setup(rank, size, backend='gloo'):
+def setup(rank: int, size: int, backend: str = 'gloo') -> None:
     """ Initialize the distributed environment. """
     os.environ['MASTER_ADDR'] = '127.0.0.1'
     os.environ['MASTER_PORT'] = '29500'
     dist.init_process_group(backend, rank=rank, world_size=size)
 
 
-def train(config: TrainDistributedConfig = TrainDistributedConfig(), save_tmp: bool = False):
-    with tempfile.NamedTemporaryFile() as fp:
+def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> Record:
+        record.save_config(config)
         torch.manual_seed(config.seed)
-        mp.spawn(_train, args=(config, fp.name), nprocs=config.n_process, join=True)
-        return OmegaConf.load(fp.name)
+        mp.spawn(_train, args=(config, record), nprocs=config.n_process, join=True)
+        return record

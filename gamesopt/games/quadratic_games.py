@@ -31,7 +31,6 @@ class QuadraticGameConfig:
     dim: int = 2
     num_players: int = 2
     bias: bool = True
-    matrix: Optional[torch.Tensor] = None
     mu: float = 0.
     L: Union[float, Tuple[float, float]] = 1.
     max_im: float = 1.
@@ -45,10 +44,7 @@ class QuadraticGame(Game):
         players = [torch.zeros(self.dim, requires_grad=True), torch.zeros(self.dim, requires_grad=True)]
         super().__init__(players, config.num_samples)
         
-        if config.matrix is None:
-            self.matrix = make_random_matrix(config.num_players, config.num_samples, config.dim, config.mu, config.L, config.max_im) 
-        else:
-            self.matrix = config.matrix
+        self.matrix = make_random_matrix(config.num_players, config.num_samples, config.dim, config.mu, config.L, config.max_im) 
 
         self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
