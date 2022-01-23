@@ -4,7 +4,7 @@ from .utils import random_vector
 import torch
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Union, Tuple
+from typing import Union, Tuple
 
 
 def make_random_matrix(num_players: int, num_samples: int, dim: int, mu: float = 0, L: float = 1., max_im: float = 1.) -> torch.Tensor:
@@ -34,7 +34,6 @@ class QuadraticGameConfig:
     mu: float = 0.
     L: Union[float, Tuple[float, float]] = 1.
     max_im: float = 1.
-    prox: bool = False
 
 
 class QuadraticGame(Game):

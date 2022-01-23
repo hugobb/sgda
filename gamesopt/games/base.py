@@ -21,6 +21,10 @@ class Game(ABC):
             self.shape.append(p.size())
             self.split_size.append(p.numel())
 
+    def broadcast(self, src: int) -> None:
+        for i in range(self.num_players):
+            dist.broadcast(self.players[i], src)
+
     def unflatten(self, index: int, x: torch.Tensor) -> torch.Tensor:
         return x.split(self.split_size)[index].view(self.shape[index])
 

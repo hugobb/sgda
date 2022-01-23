@@ -96,6 +96,9 @@ class Experiment:
         self.records[record.id] = record
         return record
 
+    def refresh(self):
+        self.load_records()
+
 
 class Database:
     def __init__(self, log_dir: Path) -> None:

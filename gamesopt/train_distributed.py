@@ -21,6 +21,7 @@ def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), reco
     
     game = load_game(config.game)
     game.set_master_node(0, config.n_process)
+    game.broadcast(0)
     optimizer: DistributedOptimizer = load_optimizer(game, config.optimizer)
 
     metrics = defaultdict(list)
