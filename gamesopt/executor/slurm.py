@@ -21,6 +21,7 @@ class SlurmConfig:
     nodes: Optional[int] = None
     cpus_per_task: Optional[int] = None
     slurm_array_parallelism: Optional[int] = None
+    tasks_per_node: Optional[int] = None
 
     def merge(self, config):
         for key, value in asdict(self).items():
@@ -31,7 +32,7 @@ class SlurmConfig:
 
 default_config = SlurmConfig(
     log_folder=MISSING,
-    gpus_per_node=1,
+    gpus_per_node=0,
     mem_by_gpu=16,
     partition="",
     comment="",
@@ -40,6 +41,7 @@ default_config = SlurmConfig(
     nodes=1,
     cpus_per_task=1,
     slurm_array_parallelism=1,
+    tasks_per_node=1,
 )
 
 
@@ -54,7 +56,7 @@ def create_slurm_executor(config: SlurmConfig = SlurmConfig()):
         timeout_min=config.time_in_min,
         nodes=config.nodes,
         cpus_per_task=config.cpus_per_task,
-        tasks_per_node=config.gpus_per_node,
+        tasks_per_node=config.tasks_per_node,
         gpus_per_node=config.gpus_per_node,
         mem_gb=config.mem_by_gpu * config.gpus_per_node,
         slurm_array_parallelism=config.slurm_array_parallelism,

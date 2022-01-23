@@ -67,7 +67,7 @@ class ExpInfo(TypedDict):
     name: str
     date: str
     path: str
-
+        
 
 class Experiment:
     def __init__(self, info: ExpInfo) -> None:
@@ -76,7 +76,7 @@ class Experiment:
         self.date = info["date"]
         self.path = Path(info["path"])
 
-        self.records = []
+        self.records = {}
         self.load_records()
 
     def load_records(self) -> None:
@@ -94,6 +94,7 @@ class Experiment:
         
         record = Record(info)
         self.records[record.id] = record
+        print("Record: %s" % record.id)
         return record
 
     def refresh(self):
@@ -126,6 +127,7 @@ class Database:
         
         exp = Experiment(info)
         self.experiments[exp.id] = exp
+        print("Experiment: %s" % exp.id)
         return exp
 
     
