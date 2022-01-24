@@ -72,6 +72,7 @@ class QuadraticGame(Game):
         return loss
 
     def save(self, filename: Path) -> None:
+        filename.parent.mkdir(parents=True, exist_ok=True)
         torch.save({"config": self.config, "players": self.players, "matrix": self.matrix, "bias": self.bias}, filename)
 
     def load(self, filename: Path, copy: bool = False) -> Game:
