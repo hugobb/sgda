@@ -1,3 +1,4 @@
+from gamesopt.optimizer.prox import Prox
 from .base import Optimizer, OptimizerOptions
 from .lr import LRScheduler
 from gamesopt.games import Game
@@ -19,8 +20,8 @@ class ProxSGDA(Optimizer):
 
 
 class ProxLSVRGDA(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
 
         self.p = options.p
         if self.p is None:
@@ -56,8 +57,8 @@ class ProxLSVRGDA(Optimizer):
 
 
 class VRFoRB(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
 
         self.p = options.p
         if self.p is None:
@@ -92,8 +93,8 @@ class VRFoRB(Optimizer):
 
 
 class SVRG(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
 
         if isinstance(self.lr, LRScheduler):
             self.lr = (self.lr,) * game.num_players
@@ -127,8 +128,8 @@ class SVRG(Optimizer):
         
 
 class VRAGDA(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
 
         if isinstance(self.lr, LRScheduler):
             self.lr = (self.lr,) * game.num_players

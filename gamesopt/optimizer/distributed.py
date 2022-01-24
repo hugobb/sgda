@@ -1,7 +1,9 @@
+from gamesopt.optimizer.prox import Prox
 from .base import DistributedOptimizer, OptimizerOptions
 from gamesopt.games import Game
 import torch.distributed as dist
 import torch
+from .prox import Prox
 
 
 class QSGDA(DistributedOptimizer):
@@ -21,8 +23,8 @@ class QSGDA(DistributedOptimizer):
 
 
 class DIANA_SGDA(DistributedOptimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
         self.alpha = options.alpha
 
         self.buffer = 0
@@ -50,8 +52,8 @@ class DIANA_SGDA(DistributedOptimizer):
         self.num_grad += len(index)
 
 class VR_DIANA_SGDA(DistributedOptimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
         self.alpha = options.alpha
 
         self.p = options.p

@@ -102,4 +102,5 @@ class Game(ABC):
         for i in range(self.num_players):
             dist += ((game.players[i] - self.players[i])**2).sum()
         return float(dist)
+        
 

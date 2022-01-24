@@ -4,7 +4,7 @@ from gamesopt.games import Game
 from enum import Enum
 from dataclasses import dataclass
 
-from .prox import ProxOptions, load_prox
+from .prox import Prox
 from .quantization import QuantizationOptions, load_quantization
 from .lr import LRScheduler, FixedLR
 import torch
@@ -36,7 +36,6 @@ class OptimizerOptions:
     batch_size: int = 1
     N: Optional[int] = None
     T: int = 1
-    prox_options: ProxOptions = ProxOptions()
     quantization_options: QuantizationOptions = QuantizationOptions()
 
     def __post_init__(self):
@@ -47,7 +46,7 @@ class OptimizerOptions:
 
 
 class Optimizer(ABC):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         self.game: Game = game
         self.k = 0
         self.lr = options.lr
@@ -55,7 +54,7 @@ class Optimizer(ABC):
         self.full_batch = options.full_batch
         self.num_grad = 0
 
-        self.prox = load_prox(options.prox_options)
+        self.prox = prox
         self.quantization = load_quantization(options.quantization_options)
 
         if isinstance(self.lr, float):
@@ -71,9 +70,17 @@ class Optimizer(ABC):
     def step(self) -> None:
         pass
 
+    def fixed_point_check(self, precision: float = 1.) -> float:
+        grad = self.game.full_operator()
+        dist = 0
+        for i in range(self.game.num_players):
+            g = self.game.unflatten(i, grad)
+            dist += ((self.game.players[i] - self.prox(self.game.players[i] - precision*g, precision))**2).sum()
+        return float(dist)
+
 class DistributedOptimizer(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
         self.size = int(dist.get_world_size())
         self.n_bits = 0
     

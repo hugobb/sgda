@@ -3,11 +3,12 @@ from gamesopt.games import Game
 from .lr import LRScheduler
 from typing import Optional
 import torch
+from .prox import Prox
 
 
 class SVRE(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
 
         if isinstance(self.lr, LRScheduler):
             self.lr = (self.lr,) * game.num_players
@@ -49,8 +50,8 @@ class SVRE(Optimizer):
 
 
 class EGwithVR(Optimizer):
-    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions()) -> None:
-        super().__init__(game, options)
+    def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
+        super().__init__(game, options, prox)
         self.alpha = options.alpha
 
         self.p = options.p

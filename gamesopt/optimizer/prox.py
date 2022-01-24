@@ -12,25 +12,25 @@ class ProxType(Enum):
 @dataclass
 class ProxOptions:
     prox_type: ProxType = ProxType.NONE
-    l1_reg: float = 1.
+    l1_reg: float = 1e-2
     ball_radius: float = 1.
 
 
 def load_prox(options: ProxOptions = ProxOptions()):
     if options.prox_type == ProxType.NONE:
-        return DefaultProx()
+        return Prox()
     elif options.prox_type == ProxType.L1_REG:
         return L1RegProx(options)
     elif options.prox_type == ProxType.LINF_BALL_L1_REG:
         return LinfBallL1RegProx(options)
 
 
-class DefaultProx:
+class Prox:
     def __call__(self, x: torch.Tensor, lr: Optional[float] = None) -> torch.Tensor:
         return x
 
 
-class L1RegProx(DefaultProx):
+class L1RegProx(Prox):
     def __init__(self, options: ProxOptions=ProxOptions()) -> None:
         self.l1_reg = options.l1_reg
 
@@ -38,7 +38,7 @@ class L1RegProx(DefaultProx):
         return  x.sign()*F.relu(abs(x) - lr*self.l1_reg)
        
 
-class LinfBallL1RegProx(DefaultProx):
+class LinfBallL1RegProx(Prox):
     def __init__(self, options: ProxOptions=ProxOptions()) -> None:
         self.l1_reg = options.l1_reg
         self.ball_radius = options.ball_radius
