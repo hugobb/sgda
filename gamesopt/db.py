@@ -6,6 +6,7 @@ from typing import TypedDict, Optional
 import tempfile
 from omegaconf import OmegaConf
 import pickle
+import shutil
 
 
 class RecordInfo(TypedDict):
@@ -103,6 +104,10 @@ class Experiment:
     def refresh(self):
         self.load_records()
 
+    def deleteRecord(self, key: str) -> None:
+        shutil.rmtree(self.path / key)
+        self.records.pop(key)
+
 
 class Database:
     def __init__(self, log_dir: Path) -> None:
@@ -142,5 +147,9 @@ class Database:
         self.experiments[exp.id] = exp
         print("Experiment: %s" % exp.id)
         return exp
+
+    def deleteExp(self, key: str) -> None:
+        shutil.rmtree(self.log_dir / key)
+        self.experiments.pop(key)
 
     
