@@ -114,7 +114,7 @@ class Database:
         return self.experiments[key]
 
     def getRecord(self, key: str) -> Record:
-        exp_id = list(self.log_dir.glob("*/%s" % key)).parts[-2]
+        exp_id = list(self.log_dir.glob("*/%s" % key))[0].parts[-2]
         self.experiments[exp_id][key]
 
     def refresh(self):
