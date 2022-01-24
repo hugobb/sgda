@@ -107,6 +107,9 @@ class Database:
         self.experiments = {}
         self.loadExp()
     
+    def __getitem__(self, key: str) -> Experiment:
+        return self.experiments[key]
+
     def loadExp(self) -> None:
         list_exp = self.log_dir.glob("*/.info.json")
         for path in list_exp:
