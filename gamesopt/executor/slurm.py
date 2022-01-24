@@ -22,6 +22,7 @@ class SlurmConfig:
     cpus_per_task: Optional[int] = None
     slurm_array_parallelism: Optional[int] = None
     tasks_per_node: Optional[int] = None
+    mem_gb: Optional[int] = None
 
     def merge(self, config):
         for key, value in asdict(self).items():
@@ -42,12 +43,13 @@ default_config = SlurmConfig(
     cpus_per_task=1,
     slurm_array_parallelism=1,
     tasks_per_node=1,
+    mem_gb=16
 )
 
 
 def create_slurm_executor(config: SlurmConfig = SlurmConfig()):
 
-    executor = submitit.AutoExecutor(folder=config.log_folder)
+    executor = submitit.AutoExecutor(folder=config.log_folder, cluster="slurm")
     executor.update_parameters(
         slurm_partition=config.partition,
         slurm_comment=config.comment,
@@ -58,7 +60,7 @@ def create_slurm_executor(config: SlurmConfig = SlurmConfig()):
         cpus_per_task=config.cpus_per_task,
         tasks_per_node=config.tasks_per_node,
         gpus_per_node=config.gpus_per_node,
-        mem_gb=config.mem_by_gpu * config.gpus_per_node,
+        mem_gb=config.mem_gb,
         slurm_array_parallelism=config.slurm_array_parallelism,
     )
 
