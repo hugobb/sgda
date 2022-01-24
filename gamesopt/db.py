@@ -79,6 +79,9 @@ class Experiment:
         self.records = {}
         self.load_records()
 
+    def __getitem__(self, key: str) -> Record:
+        return self.records[key]
+
     def load_records(self) -> None:
         list_exp = self.path.glob("*/.info.json")
         for path in list_exp:
@@ -109,6 +112,13 @@ class Database:
     
     def __getitem__(self, key: str) -> Experiment:
         return self.experiments[key]
+
+    def getRecord(self, key: str) -> Record:
+        exp_id = self.log_dir.glob("*/%s" % key).parts[-2]
+        self.experiments[exp_id][key]
+
+    def refresh(self):
+        self.loadExp()
 
     def loadExp(self) -> None:
         list_exp = self.log_dir.glob("*/.info.json")
