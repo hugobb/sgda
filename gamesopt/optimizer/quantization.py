@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Tuple
-
+import torch.distributed as dist
 import torch
 
 
@@ -51,8 +51,9 @@ class RandKQuantization(DefaultQuantization):
 
 class NormQuantization(DefaultQuantization):
     def __call__(self, x: torch.Tensor) ->  Tuple[torch.Tensor, int]:
-        norm = (x**2).sum()
-        xi = torch.zeros_like(x).bernoulli_(abs(x) / norm)
+        norm = (x**2).sum().sqrt()
+        p = abs(x) / norm
+        xi = torch.zeros_like(x).bernoulli_(p)
         x = norm * x * xi
         return x, get_nbits(x) + 2*xi.count_nonzero()
 

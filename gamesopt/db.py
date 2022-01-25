@@ -28,7 +28,7 @@ class Record:
         self.path = Path(info["path"])
 
         self.config = self.load_config()
-        self.metrics = self.load_metrics()
+        self.load_metrics()
 
     def save_config(self, config):
         self.config = config
@@ -46,9 +46,9 @@ class Record:
     def load_metrics(self):
         filename = self.path / "metrics.yaml"
         if filename.is_file():
-            return OmegaConf.load(filename)
+            self.metrics = OmegaConf.load(filename)
         else:
-            return None
+            self.metrics = None
 
     def save_metrics(self, metrics):
         self.metrics = OmegaConf.structured(dict(metrics))

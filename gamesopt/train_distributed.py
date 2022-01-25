@@ -46,7 +46,8 @@ def setup(rank: int, size: int, backend: str = 'gloo') -> None:
 
 
 def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> Record:
-        record.save_config(config)
-        torch.manual_seed(config.seed)
-        mp.spawn(_train, args=(config, record), nprocs=config.n_process, join=True)
-        return record
+    record.save_config(config)
+    torch.manual_seed(config.seed)
+    mp.spawn(_train, args=(config, record), nprocs=config.n_process, join=True)
+    record.load_metrics()
+    return record
