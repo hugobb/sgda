@@ -25,6 +25,7 @@ def train(config: TrainConfig = TrainConfig(), record: Record = Record()) -> Rec
     record.save_config(config)
     torch.manual_seed(config.seed)
     
+    print("Init...")
     game = load_game(config.game)
     if config.load_file is not None:
         game_copy = game.load(config.load_file, copy=True)
@@ -32,6 +33,7 @@ def train(config: TrainConfig = TrainConfig(), record: Record = Record()) -> Rec
     prox = load_prox(config.prox)    
     optimizer = load_optimizer(game, config.optimizer, prox)
 
+    
     metrics = defaultdict(list)
     for _ in range(config.num_iter):
         optimizer.step()

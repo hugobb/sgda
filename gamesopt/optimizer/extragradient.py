@@ -19,15 +19,15 @@ class SVRE(Optimizer):
         
     def set_state(self) -> None:
         self.game_copy = self.game.copy()
-        self.full_grad = self.game_copy.full_operator()
+        self.full_grad = self.game_copy.full_operator().detach()
         self.N.geometric_(self.p)
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         index = self.sample()
         game_copy = self.game.copy()
-        grad = self.game.operator(index)
-        grad_copy = self.game_copy.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_copy.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         for i in range(self.game.num_players):
             g = self.game.unflatten(i, update)
@@ -36,8 +36,8 @@ class SVRE(Optimizer):
         self.num_grad += 2*len(index)
 
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game_copy.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_copy.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         for i in range(self.game.num_players):
             g = self.game.unflatten(i, update)
@@ -63,7 +63,7 @@ class EGwithVR(Optimizer):
 
     def set_state(self):
         self.game_copy = self.game.copy()
-        self.full_grad = self.game.full_operator()
+        self.full_grad = self.game.full_operator().detach()
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
@@ -76,8 +76,8 @@ class EGwithVR(Optimizer):
             mean_players.append(mean)
 
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game_copy.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_copy.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         for i  in range(self.game.num_players):
             g = self.game.unflatten(i, update)

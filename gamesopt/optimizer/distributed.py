@@ -32,7 +32,7 @@ class DIANA_SGDA(DistributedOptimizer):
 
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
+        grad = self.game.operator(index).detach()
 
         delta: torch.Tensor = grad - self.buffer
         delta, n_bits = self.quantization(delta)
@@ -68,13 +68,13 @@ class VR_DIANA_SGDA(DistributedOptimizer):
 
     def set_state(self) -> None:
         self.game_copy = self.game.copy()
-        self.full_grad = self.game.full_operator()
+        self.full_grad = self.game.full_operator().detach()
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game.operator(index).detach()
 
         update = (grad - grad_copy + self.full_grad)
 

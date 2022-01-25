@@ -8,7 +8,7 @@ import torch
 class ProxSGDA(Optimizer):
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
+        grad = self.game.operator(index).detach()
         
         for i in range(self.game.num_players):
             lr = self.lr(self.k)
@@ -34,14 +34,14 @@ class ProxLSVRGDA(Optimizer):
 
     def set_state(self) -> None:
         self.game_copy = self.game.copy()
-        self.full_grad = self.game.full_operator()
+        self.full_grad = self.game.full_operator().detach()
         self.num_grad += self.game.num_samples
         self.num_full_grad += 1
 
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game_copy.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_copy.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         
         for i in range(self.game.num_players):    
@@ -71,13 +71,13 @@ class VRFoRB(Optimizer):
     def set_state(self) -> None:
         self.game_previous = self.game_copy.copy()
         self.game_copy = self.game.copy()
-        self.full_grad = self.game.full_operator()
+        self.full_grad = self.game.full_operator().detach()
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game_previous.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_previous.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         
         for i in range(self.game.num_players):
@@ -107,13 +107,13 @@ class SVRG(Optimizer):
 
     def set_state(self) -> None:
         self.game_copy = self.game.copy()
-        self.full_grad = self.game.full_operator()
+        self.full_grad = self.game.full_operator().detach()
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         index = self.sample()
-        grad = self.game.operator(index)
-        grad_copy = self.game_copy.operator(index)
+        grad = self.game.operator(index).detach()
+        grad_copy = self.game_copy.operator(index).detach()
         update = grad - grad_copy + self.full_grad
         
         for i in range(self.game.num_players):
@@ -146,14 +146,14 @@ class VRAGDA(Optimizer):
         
     def set_state(self, game: Game):
         self.game_copy = game.copy()
-        self.full_grad = game.full_operator()
+        self.full_grad = game.full_operator().detach()
         self.num_grad += self.game.num_samples
 
     def step(self) -> None:
         for i in range(self.game.num_players):
             index = self.sample()
-            grad = self._game.operator(index, i)
-            grad_copy = self.game_copy.operator(index, i)
+            grad = self._game.operator(index, i).detach()
+            grad_copy = self.game_copy.operator(index, i).detach()
             fg = self.game.unflatten(i, self.full_grad)
             self._game.players[i] = self._game.players[i] - self.lr[i](self.k)*(grad - grad_copy + fg)
 

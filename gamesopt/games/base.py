@@ -64,7 +64,7 @@ class Game(ABC):
     def grad(self, loss: torch.Tensor, index: int) -> torch.Tensor:
         return autograd.grad(loss, self.players[index], retain_graph=True)[0]
 
-    def full_operator(self) -> List[List[torch.Tensor]]:
+    def full_operator(self) -> torch.Tensor:
         index = self.sample_batch()
         return self.operator(index)
 
