@@ -58,7 +58,7 @@ def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Rec
         port = str(random.randrange(1030, 49151))
         print("Trying port %s" % port)
         try:
-            mp.spawn(_train, args=(config, record, port), nprocs=config.n_process, join=True)
+            mp.spawn(_train, args=(port, config, record), nprocs=config.n_process, join=True)
             break
         except RuntimeError as e:
             print(e)
