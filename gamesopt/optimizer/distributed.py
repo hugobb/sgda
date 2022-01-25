@@ -81,20 +81,21 @@ class VR_DIANA_SGDA(DistributedOptimizer):
         if torch.bernoulli(self.p):
             self.set_state()
 
-        delta: torch.Tensor = update - self.buffer
-        delta, n_bits = self.quantization(delta)
-        self.buffer = self.buffer + self.alpha*delta
+        with torch.no_grad():
+            delta: torch.Tensor = update - self.buffer
+            delta, n_bits = self.quantization(delta)
+            self.buffer = self.buffer + self.alpha*delta
 
-        self.n_bits += n_bits
-        dist.all_reduce(delta)
-        delta /= self.size
-        full_grad = self.buffer_server + delta
-        self.buffer_server = self.buffer_server + self.alpha*delta
+            self.n_bits += n_bits
+            dist.all_reduce(delta)
+            delta /= self.size
+            full_grad = self.buffer_server + delta
+            self.buffer_server = self.buffer_server + self.alpha*delta
 
-        for i in range(self.game.num_players):
-            lr = self.lr(self.k)
-            g = self.game.unflatten(i, full_grad)
-            self.game.players[i] = self.prox(self.game.players[i] - lr*g/self.size, lr)    
-        
-        self.k += 1
-        self.num_grad += 2*len(index)
+            for i in range(self.game.num_players):
+                lr = self.lr(self.k)
+                g = self.game.unflatten(i, full_grad)
+                self.game.players[i].data = self.prox(self.game.players[i] - lr*g/self.size, lr)    
+            
+            self.k += 1
+            self.num_grad += 2*len(index)
