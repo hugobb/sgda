@@ -1,3 +1,4 @@
+from random import randrange
 from gamesopt.db import Record
 from .optimizer.base import DistributedOptimizer
 from .games import load_game
@@ -9,6 +10,8 @@ import torch.multiprocessing as mp
 import torch.distributed as dist
 import os
 import torch
+import uuid
+import random
 
 
 @dataclass
@@ -39,10 +42,17 @@ def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), reco
             record.save_metrics(metrics)
 
 def setup(rank: int, size: int, backend: str = 'gloo') -> None:
-    """ Initialize the distributed environment. """
     os.environ['MASTER_ADDR'] = '127.0.0.1'
-    os.environ['MASTER_PORT'] = '29500'
-    dist.init_process_group(backend, rank=rank, world_size=size)
+    
+    # Tries to allocate a port until a port is available
+    while True:
+        try:
+            port = str(random.randrange(1030, 49151))
+            os.environ['MASTER_PORT'] = port
+            dist.init_process_group(backend, rank=rank, world_size=size)
+            return
+        except:
+            pass
 
 
 def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> Record:
