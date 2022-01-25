@@ -33,23 +33,23 @@ class DIANA_SGDA(DistributedOptimizer):
     def step(self) -> None:
         index = self.sample()
         grad = self.game.operator(index).detach()
+        with torch.no_grad():
+            delta: torch.Tensor = grad - self.buffer
+            delta, n_bits = self.quantization(delta)
+            self.buffer = self.buffer + self.alpha*delta
 
-        delta: torch.Tensor = grad - self.buffer
-        delta, n_bits = self.quantization(delta)
-        self.buffer = self.buffer + self.alpha*delta
-
-        self.n_bits += n_bits
-        dist.all_reduce(delta)
-        delta /= self.size
-        full_grad = self.buffer_server + delta
-        self.buffer_server = self.buffer_server + self.alpha*delta
-        for i in range(self.game.num_players):
-            lr = self.lr(self.k)
-            g = self.game.unflatten(i, full_grad)
-            self.game.players[i] = self.prox(self.game.players[i] - lr*g/self.size, lr)
-        
-        self.k += 1
-        self.num_grad += len(index)
+            self.n_bits += n_bits
+            dist.all_reduce(delta)
+            delta /= self.size
+            full_grad = self.buffer_server + delta
+            self.buffer_server = self.buffer_server + self.alpha*delta
+            for i in range(self.game.num_players):
+                lr = self.lr(self.k)
+                g = self.game.unflatten(i, full_grad)
+                self.game.players[i] = self.prox(self.game.players[i] - lr*g/self.size, lr)
+            
+            self.k += 1
+            self.num_grad += len(index)
 
 class VR_DIANA_SGDA(DistributedOptimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
