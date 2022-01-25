@@ -35,6 +35,7 @@ def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), reco
         num_grad = optimizer.get_num_grad()
         n_bits = optimizer.get_n_bits()
 
+        print(rank, hamiltonian)
         if rank == 0:
             metrics["hamiltonian"].append(hamiltonian)
             metrics["num_grad"].append(num_grad)
