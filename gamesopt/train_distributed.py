@@ -49,13 +49,13 @@ def setup(rank: int, size: int, backend: str = 'gloo') -> None:
     
     # Tries to allocate a port until a port is available
     while True:
+        port = str(random.randrange(1030, 49151))
+        print("Trying port %s" % port)
+        os.environ['MASTER_PORT'] = port
         try:
-            port = str(random.randrange(1030, 49151))
-            print("Trying port %s" % port)
-            os.environ['MASTER_PORT'] = port
             dist.init_process_group(backend, rank=rank, world_size=size)
             return
-        except:
+        except Exception as e:
             pass
 
 
