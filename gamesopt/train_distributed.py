@@ -1,5 +1,3 @@
-from msilib.schema import Error
-from random import randrange
 from gamesopt.db import Record
 from .optimizer.base import DistributedOptimizer
 from .games import load_game
