@@ -84,7 +84,7 @@ class QuadraticGame(Game):
         filename = ""
         if self.rank is not None:
             filename += "_%i"%self.rank
-        filename = path / "%s.pth" % filename
+        filename = path / ("%s.pth" % filename)
 
         torch.save({"config": self.config, "players": self.players, "matrix": self.matrix, "bias": self.bias}, filename)
 
