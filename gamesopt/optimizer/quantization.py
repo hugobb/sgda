@@ -36,7 +36,7 @@ def get_nbits(x: torch.Tensor) -> int:
 
 class DefaultQuantization:
     def __call__(self, x: torch.Tensor) ->  Tuple[torch.Tensor, int]:
-        return x, get_nbits(x)*x.numel()
+        return x, int(get_nbits(x)*x.numel())
 
 class RandKQuantization(DefaultQuantization):
     def __init__(self, options: QuantizationOptions) -> None:
@@ -47,7 +47,7 @@ class RandKQuantization(DefaultQuantization):
         indices = torch.randperm(n)[n - self.k]
         x[indices] = 0
 
-        return x, get_nbits(x)*self.k
+        return x, int(get_nbits(x)*self.k)
 
 class NormQuantization(DefaultQuantization):
     def __call__(self, x: torch.Tensor) ->  Tuple[torch.Tensor, int]:
@@ -55,5 +55,5 @@ class NormQuantization(DefaultQuantization):
         p = abs(x) / norm
         xi = torch.zeros_like(x).bernoulli_(p)
         x = norm * x * xi
-        return x, get_nbits(x) + 2*xi.count_nonzero()
+        return x, int(get_nbits(x) + 2*xi.count_nonzero())
 

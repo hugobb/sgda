@@ -46,7 +46,7 @@ class DIANA_SGDA(DistributedOptimizer):
             for i in range(self.game.num_players):
                 lr = self.lr(self.k)
                 g = self.game.unflatten(i, full_grad)
-                self.game.players[i] = self.prox(self.game.players[i] - lr*g/self.size, lr)
+                self.game.players[i].data = self.prox(self.game.players[i] - lr*g/self.size, lr)
             
             self.k += 1
             self.num_grad += len(index)

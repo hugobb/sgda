@@ -21,15 +21,15 @@ class TestOptimizer(unittest.TestCase):
         q(torch.ones(10))
 
     def test_qsgda(self):
-        config = TrainDistributedConfig(num_iter=2)
+        config = TrainDistributedConfig(num_iter=5)
         train(config)
 
     def test_diana(self):
-        config = TrainDistributedConfig(num_iter=2)
+        config = TrainDistributedConfig(num_iter=5)
         config.optimizer.optimizer_type = OptimizerType.DIANA_SGDA
         train(config)
 
     def test_diana_vr(self):
-        config = TrainDistributedConfig(num_iter=2)
+        config = TrainDistributedConfig(num_iter=5)
         config.optimizer.optimizer_type = OptimizerType.VR_DIANA_SGDA
         train(config)
