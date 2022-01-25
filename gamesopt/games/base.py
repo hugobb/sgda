@@ -8,12 +8,13 @@ import torch.distributed as dist
 
 
 class Game(ABC):
-    def __init__(self, players: List[torch.Tensor], num_samples: int) -> None:
+    def __init__(self, players: List[torch.Tensor], num_samples: int, rank: Optional[int] = None) -> None:
         self.num_players = len(players)
         self.players = players
         self.num_samples = num_samples
         self.master_node = None
         self.n_process = 1
+        self.rank = rank
 
         self.shape = []
         self.split_size = []

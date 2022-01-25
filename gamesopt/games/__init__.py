@@ -1,3 +1,4 @@
+from typing import Optional
 from .bilinear import BilinearGame, BilinearGameConfig
 from .robust_regression import RobustLinRegConfig, RobustLinReg, RobustLogReg
 from .base import Game
@@ -24,17 +25,17 @@ class GameOptions:
     bilinear_options: BilinearGameConfig = BilinearGameConfig()
 
 
-def load_game(options: GameOptions = GameOptions()) -> Game:
+def load_game(options: GameOptions = GameOptions(), rank: Optional[int] = None) -> Game:
     if options.game_type == GameType.QUADRATIC:
-        return QuadraticGame(options.quadratic_options)
+        return QuadraticGame(options.quadratic_options, rank)
     elif options.game_type == GameType.KELLY_AUCTION:
-        return KellyAuction(options.kelly_auction_options)
+        return KellyAuction(options.kelly_auction_options, rank)
     elif options.game_type == GameType.ROBUST_LINEAR_REG:
-        return RobustLinReg(options.robust_linear_reg_options)
+        return RobustLinReg(options.robust_linear_reg_options, rank)
     elif options.game_type == GameType.BILINEAR:
-        return BilinearGame(options.bilinear_options)
+        return BilinearGame(options.bilinear_options, rank)
     elif options.game_type == GameType.ROBUST_LOGISTIC_REG:
-        return RobustLogReg()
+        return RobustLogReg(rank)
     else:
         raise ValueError()
 

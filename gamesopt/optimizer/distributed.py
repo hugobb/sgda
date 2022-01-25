@@ -9,17 +9,19 @@ from .prox import Prox
 class QSGDA(DistributedOptimizer):
     def step(self) -> None:
         index = self.sample()
-        grad, n_bits = self.quantization(self.game.operator(index))
-        
-        self.n_bits += n_bits
-        dist.all_reduce(grad)
-        for i in range(self.game.num_players):
-            lr = self.lr(self.k)
-            g = self.game.unflatten(i, grad) # Reshape the grad to match players shape
-            self.game.players[i] = self.prox(self.game.players[i] - lr*g/self.size, lr)
+        grad = self.game.operator(index)
+        with torch.no_grad():
+            grad, n_bits =self.quantization(grad)
+            
+            self.n_bits += n_bits
+            dist.all_reduce(grad)
+            for i in range(self.game.num_players):
+                lr = self.lr(self.k)
+                g = self.game.unflatten(i, grad) # Reshape the grad to match players shape
+                self.game.players[i].data = self.prox(self.game.players[i] - lr*g/self.size, lr)
 
-        self.k += 1
-        self.num_grad += len(index)
+            self.k += 1
+            self.num_grad += len(index)
 
 
 class DIANA_SGDA(DistributedOptimizer):

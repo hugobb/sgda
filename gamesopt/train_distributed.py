@@ -22,9 +22,12 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
     setup(rank, config.n_process, port)
     
     print("Init...")
-    game = load_game(config.game)
+    game = load_game(config.game, rank)
     game.set_master_node(0, config.n_process)
     game.broadcast(0)
+    if config.load_file is not None:
+        game_copy = game.load(config.load_file, copy=True)
+    
     optimizer: DistributedOptimizer = load_optimizer(game, config.optimizer)
 
     print("Starting...")
@@ -42,6 +45,12 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
             metrics["num_grad"].append(num_grad)
             metrics["n_bits"].append(n_bits)
             record.save_metrics(metrics)
+
+            if config.load_file:
+                metrics["dist2opt"].append(game.dist(game_copy))
+
+        if config.save_file is not None:
+            game.save(config.save_file)
 
 def setup(rank: int, size: int, port: str, backend: str = 'gloo') -> None:
     os.environ['MASTER_ADDR'] = '127.0.0.1'

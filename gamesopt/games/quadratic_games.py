@@ -4,7 +4,8 @@ from .utils import random_vector
 import torch
 import math
 from dataclasses import dataclass
-from typing import Union, Tuple
+from typing import Optional, Union, Tuple
+from torch import linalg
 
 
 def make_random_matrix(num_players: int, num_samples: int, dim: int, mu: float = 0, L: float = 1., max_im: float = 1.) -> torch.Tensor:
@@ -34,20 +35,25 @@ class QuadraticGameConfig:
     mu: float = 0.
     L: Union[float, Tuple[float, float]] = 1.
     max_im: float = 1.
+    importance_sampling: bool = False
 
 
 class QuadraticGame(Game):
-    def __init__(self, config: QuadraticGameConfig = QuadraticGameConfig()) -> None:
+    def __init__(self, config: QuadraticGameConfig = QuadraticGameConfig(), rank: Optional[int] = None) -> None:
         self.config = config
         self.dim = config.dim
         players = [torch.zeros(self.dim, requires_grad=True), torch.zeros(self.dim, requires_grad=True)]
-        super().__init__(players, config.num_samples)
+        super().__init__(players, config.num_samples, rank)
         
         self.matrix = make_random_matrix(config.num_players, config.num_samples, config.dim, config.mu, config.L, config.max_im) 
 
         self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self.dim))
+
+        if config.importance_sampling:
+            eigenvalues = linalg.eigvals(self.matrix)
+
 
         self.reset()
 
@@ -71,11 +77,21 @@ class QuadraticGame(Game):
             loss.append(_loss)
         return loss
 
-    def save(self, filename: Path) -> None:
-        filename.parent.mkdir(parents=True, exist_ok=True)
+    def save(self, path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+        filename = ""
+        if self.rank is not None:
+            filename += "_%i"%self.rank
+        filename = path / "%s.pth" % filename
+
         torch.save({"config": self.config, "players": self.players, "matrix": self.matrix, "bias": self.bias}, filename)
 
-    def load(self, filename: Path, copy: bool = False) -> Game:
+    def load(self, path: Path, copy: bool = False) -> Game:
+        filename = ""
+        if self.rank is not None:
+            filename += "_%i"%self.rank
+        filename = path / "%s.pth" % filename
+        
         checkpoint = torch.load(filename)
         self.matrix = checkpoint["matrix"]
         self.bias = checkpoint["bias"]
