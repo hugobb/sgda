@@ -92,7 +92,7 @@ class QuadraticGame(Game):
         filename = ""
         if self.rank is not None:
             filename += "_%i"%self.rank
-        filename = path / "%s.pth" % filename
+        filename = path / ("%s.pth" % filename)
 
         checkpoint = torch.load(filename)
         self.matrix = checkpoint["matrix"]
