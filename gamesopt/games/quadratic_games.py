@@ -54,7 +54,7 @@ class QuadraticGame(Game):
         self.p = torch.ones(self.num_samples) / self.num_samples
         if config.importance_sampling:
             eigenvalues: torch.Tensor = linalg.eigvals(self.matrix)
-            ell = float(1 / ((1 / eigenvalues).real).min(-1))
+            ell = 1 / ((1 / eigenvalues).real).min(-1)
             self.p = ell / (ell.sum())
 
         self.reset()
