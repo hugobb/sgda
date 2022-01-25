@@ -78,7 +78,7 @@ class Experiment:
         self.path = Path(info["path"])
 
         self.records = {}
-        self.load_records()
+        #self.load_records()
 
     def __getitem__(self, key: str) -> Record:
         return self.records[key]
