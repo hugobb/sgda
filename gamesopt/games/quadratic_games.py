@@ -51,9 +51,11 @@ class QuadraticGame(Game):
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self.dim))
 
+        self.p = torch.ones(self.num_samples) / self.num_samples
         if config.importance_sampling:
-            eigenvalues = linalg.eigvals(self.matrix)
-
+            eigenvalues: torch.Tensor = linalg.eigvals(self.matrix)
+            ell = float(1 / ((1 / eigenvalues).real).min(-1))
+            self.p = ell / (ell.sum())
 
         self.reset()
 
@@ -61,8 +63,8 @@ class QuadraticGame(Game):
         for i in range(self.num_players):
             self.players[i] = random_vector(self.dim)
 
-    def sample(self, n: int = 1) -> torch.Tensor:
-        return torch.randint(self.num_samples, size=(n, ))
+    def sample(self, n: int = 1) -> torch.Tensor:      
+        return torch.multinomial(self.p, n, replacement=True)
 
     def sample_batch(self) -> torch.Tensor:
         return torch.arange(self.num_samples).long()
@@ -91,7 +93,7 @@ class QuadraticGame(Game):
         if self.rank is not None:
             filename += "_%i"%self.rank
         filename = path / "%s.pth" % filename
-        
+
         checkpoint = torch.load(filename)
         self.matrix = checkpoint["matrix"]
         self.bias = checkpoint["bias"]

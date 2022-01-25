@@ -13,6 +13,9 @@ import uuid
 import random
 
 
+class PortNotAvailableError(Exception):
+    pass
+
 @dataclass
 class TrainDistributedConfig(TrainConfig):
     n_process: int = 2
@@ -55,7 +58,10 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
 def setup(rank: int, size: int, port: str, backend: str = 'gloo') -> None:
     os.environ['MASTER_ADDR'] = '127.0.0.1'
     os.environ['MASTER_PORT'] = port
-    dist.init_process_group(backend, rank=rank, world_size=size)
+    try:
+        dist.init_process_group(backend, rank=rank, world_size=size)
+    except:
+        raise PortNotAvailableError
 
 
 def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> Record:
@@ -69,8 +75,8 @@ def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Rec
         try:
             mp.spawn(_train, args=(port, config, record), nprocs=config.n_process, join=True)
             break
-        except RuntimeError as e:
-            print(e)
+        except PortNotAvailableError:
+            print("Port %s not available" % port)
         else:
             raise
     
