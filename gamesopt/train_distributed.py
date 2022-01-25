@@ -22,11 +22,13 @@ class TrainDistributedConfig(TrainConfig):
 def _train(rank, config: TrainDistributedConfig = TrainDistributedConfig(), record: Record = Record()) -> None:
     setup(rank, config.n_process)
     
+    print("Init...")
     game = load_game(config.game)
     game.set_master_node(0, config.n_process)
     game.broadcast(0)
     optimizer: DistributedOptimizer = load_optimizer(game, config.optimizer)
 
+    print("Starting...")
     metrics = defaultdict(list)
     for _ in range(config.num_iter):
         optimizer.step()
@@ -49,6 +51,7 @@ def setup(rank: int, size: int, backend: str = 'gloo') -> None:
     while True:
         try:
             port = str(random.randrange(1030, 49151))
+            print("Trying port %s" % port)
             os.environ['MASTER_PORT'] = port
             dist.init_process_group(backend, rank=rank, world_size=size)
             return
