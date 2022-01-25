@@ -36,13 +36,6 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
     print("Starting...")
     metrics = defaultdict(list)
     for _ in range(config.num_iter):
-        optimizer.step()
-
-        hamiltonian = game.hamiltonian()
-        num_grad = optimizer.get_num_grad()
-        n_bits = optimizer.get_n_bits()
-
-        print(rank, hamiltonian)
         if rank == 0:
             metrics["hamiltonian"].append(hamiltonian)
             metrics["num_grad"].append(num_grad)
@@ -51,6 +44,14 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
 
             if config.load_file:
                 metrics["dist2opt"].append(game.dist(game_copy))
+                
+        optimizer.step()
+
+        hamiltonian = game.hamiltonian()
+        num_grad = optimizer.get_num_grad()
+        n_bits = optimizer.get_n_bits()
+
+        print(rank, hamiltonian)
 
         if config.save_file is not None:
             game.save(config.save_file)

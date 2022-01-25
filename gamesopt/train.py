@@ -36,13 +36,13 @@ def train(config: TrainConfig = TrainConfig(), record: Record = Record()) -> Rec
     
     metrics = defaultdict(list)
     for _ in range(config.num_iter):
-        optimizer.step()
-        
         metrics["hamiltonian"].append(game.hamiltonian())
         metrics["num_grad"].append(optimizer.num_grad)
         metrics["prox_dist"].append(optimizer.fixed_point_check(config.precision))
         if config.load_file:
             metrics["dist2opt"].append(game.dist(game_copy))
+
+        optimizer.step()
         
         record.save_metrics(metrics)
         
