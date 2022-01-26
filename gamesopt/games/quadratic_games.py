@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from rsa import compute_hash
 from .base import Game
 from .utils import random_vector
 import torch
@@ -52,12 +54,16 @@ class QuadraticGame(Game):
             self.bias = self.bias.normal_() / (10 * math.sqrt(self._dim))
 
         self.p = torch.ones(self.num_samples) / self.num_samples
-        if config.importance_sampling:
-            eigenvalues: torch.Tensor = linalg.eigvals(self.matrix)
-            ell = 1 / ((1 / eigenvalues).real).min(-1)[0]
-            self.p = ell / (ell.sum())
+        self.importace_sampling = config.importance_sampling
+        if self.importace_sampling:
+            self.set_p()       
 
         self.reset()
+
+    def set_p(self):
+        eigenvalues: torch.Tensor = linalg.eigvals(self.matrix)
+        ell = 1 / ((1 / eigenvalues).real).min(-1)[0]
+        self.p = ell / (ell.sum())
 
     def reset(self) -> None:
         for i in range(self.num_players):
@@ -97,6 +103,9 @@ class QuadraticGame(Game):
         checkpoint = torch.load(filename)
         self.matrix = checkpoint["matrix"]
         self.bias = checkpoint["bias"]
+        if self.importace_sampling:
+            self.set_p() 
+            
         if copy:
             game = self.copy()
             game.players = checkpoint["players"]
