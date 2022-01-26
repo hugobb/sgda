@@ -8,7 +8,7 @@ import torch.distributed as dist
 
 
 class Game(ABC):
-    def __init__(self, players: List[torch.Tensor], num_samples: int, rank: Optional[int] = None) -> None:
+    def __init__(self, players: List[torch.Tensor], num_samples: int, rank: Optional[int] = None, importance_sampling: bool = False) -> None:
         self.num_players = len(players)
         self.players = players
         self.num_samples = num_samples
@@ -16,6 +16,9 @@ class Game(ABC):
         self.n_process = 1
         self.rank = rank
         self.dim = sum(p.numel() for p in players)
+
+        self.p = torch.ones(self.num_samples) / self.num_samples
+        self.importance_sampling = importance_sampling
 
         self.shape = []
         self.split_size = []
@@ -57,6 +60,12 @@ class Game(ABC):
         raise NotImplementedError("You need to overwrite either `loss` or `operator`, when inheriting `Game`.")
 
     def operator(self, index: Optional[int] = None, player_index: Optional[int] = None) -> torch.Tensor:
+        grad = self._operator(index, player_index)
+        if self.importance_sampling:
+            grad = grad/float(self.p[index]*len(self.p))
+        return grad
+
+    def _operator(self, index: Optional[int] = None, player_index: Optional[int] = None) -> torch.Tensor:
         loss = self.loss(index)
         if player_index is None:
             return self.flatten(map(self.grad, loss, range(self.num_players)))
@@ -68,11 +77,10 @@ class Game(ABC):
 
     def full_operator(self) -> torch.Tensor:
         index = self.sample_batch()
-        return self.operator(index)
+        return self._operator(index)
 
     def hamiltonian(self) -> float:
-        index = self.sample_batch()
-        grad = self.operator(index)
+        grad = self.full_operator()
 
         if self.master_node is not None:
             dist.reduce(grad, self.master_node)

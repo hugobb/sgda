@@ -43,7 +43,7 @@ class QuadraticGame(Game):
         self.config = config
         self._dim = config.dim
         players = [torch.zeros(self._dim, requires_grad=True), torch.zeros(self._dim, requires_grad=True)]
-        super().__init__(players, config.num_samples, rank)
+        super().__init__(players, config.num_samples, rank, config.importance_sampling)
         
         self.matrix = make_random_matrix(config.num_players, config.num_samples, config.dim, config.mu, config.L, config.max_im) 
 
@@ -51,9 +51,7 @@ class QuadraticGame(Game):
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self._dim))
 
-        self.p = torch.ones(self.num_samples) / self.num_samples
-        self.importace_sampling = config.importance_sampling
-        if self.importace_sampling:
+        if self.importance_sampling:
             self.set_p()       
 
         self.reset()
@@ -80,9 +78,6 @@ class QuadraticGame(Game):
             for j in range(self.num_players):
                 _loss += (self.matrix[index, i*self._dim:(i+1)*self._dim, j*self._dim:(j+1)*self._dim]*self.players[j].view(1,1,-1)).sum(-1)
             _loss = (_loss*self.players[i].view(1, -1)).sum(-1).mean()
-
-            if self.importace_sampling:
-                _loss = _loss/(self.p[index]*len(self.p))
 
             loss.append(_loss)
         return loss
