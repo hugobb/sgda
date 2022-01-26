@@ -100,7 +100,7 @@ class QuadraticGame(Game):
         checkpoint = torch.load(filename)
         self.matrix = checkpoint["matrix"]
         self.bias = checkpoint["bias"]
-        if self.importace_sampling:
+        if self.importance_sampling:
             self.set_p() 
 
         if copy:
