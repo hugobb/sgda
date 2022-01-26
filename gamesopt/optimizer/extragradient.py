@@ -52,12 +52,14 @@ class SVRE(Optimizer):
 class EGwithVR(Optimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         super().__init__(game, options, prox)
-        self.alpha = options.alpha
-
         self.p = options.p
         if self.p is None:
             self.p = 1/game.num_samples
         self.p = torch.as_tensor(self.p)
+
+        self.alpha = options.alpha
+        if self.alpha is None:
+            self.alpha =  1 - float(self.p)
 
         self.set_state()    
 

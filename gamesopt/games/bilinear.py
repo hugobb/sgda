@@ -15,15 +15,15 @@ class BilinearGameConfig:
 
 class BilinearGame(Game):
     def __init__(self, config: BilinearGameConfig = BilinearGameConfig()) -> None:
-        self.dim = config.dim
-        players = [torch.zeros(self.dim, requires_grad=True), torch.zeros(self.dim, requires_grad=True)]
+        self._dim = config.dim
+        players = [torch.zeros(self._dim, requires_grad=True), torch.zeros(self._dim, requires_grad=True)]
         super().__init__(players, config.num_samples)
         
         self.matrix = torch.randn(config.num_samples, config.dim, config.dim)
         
         self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
-            self.bias = self.bias.normal_() / (10 * math.sqrt(self.dim))
+            self.bias = self.bias.normal_() / (10 * math.sqrt(self._dim))
 
         self.x_star, self.y_star = self.solve()
 
@@ -31,7 +31,7 @@ class BilinearGame(Game):
 
     def reset(self) -> None:
         for i in range(self.num_players):
-            self.players[i] = random_vector(self.dim)
+            self.players[i] = random_vector(self._dim)
 
     def sample(self, n: int = 1) -> torch.Tensor:
         return torch.randint(self.num_samples, size=(n, ))

@@ -45,9 +45,9 @@ class QuadraticGame(Game):
         players = [torch.zeros(self._dim, requires_grad=True), torch.zeros(self._dim, requires_grad=True)]
         super().__init__(players, config.num_samples, rank)
         
-        self.matrix = make_random_matrix(config.num_players, config.num_samples, config._dim, config.mu, config.L, config.max_im) 
+        self.matrix = make_random_matrix(config.num_players, config.num_samples, config.dim, config.mu, config.L, config.max_im) 
 
-        self.bias = torch.zeros(2, config.num_samples, config._dim)
+        self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
             self.bias = self.bias.normal_() / (10 * math.sqrt(self._dim))
 
@@ -74,7 +74,7 @@ class QuadraticGame(Game):
         for i in range(self.num_players):
             _loss = self.bias[i, index]
             for j in range(self.num_players):
-                _loss += (self.matrix[index, i*self._dim:(i+1)*self.dim, j*self._dim:(j+1)*self._dim]*self.players[j].view(1,1,-1)).sum(-1)
+                _loss += (self.matrix[index, i*self._dim:(i+1)*self._dim, j*self._dim:(j+1)*self._dim]*self.players[j].view(1,1,-1)).sum(-1)
             _loss = (_loss*self.players[i].view(1, -1)).sum(-1).mean()
             loss.append(_loss)
         return loss

@@ -1,4 +1,5 @@
 from gamesopt.optimizer.prox import Prox
+from gamesopt.optimizer.quantization import RandKQuantization
 from .base import DistributedOptimizer, OptimizerOptions
 from gamesopt.games import Game
 import torch.distributed as dist
@@ -29,8 +30,10 @@ class DIANA_SGDA(DistributedOptimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         super().__init__(game, options, prox)
         self.alpha = options.alpha
-        if self.alpha is None:
+        if self.alpha is None and isinstance(self.quantization, RandKQuantization):
             self.alpha = self.quantization.k / self.game.dim
+        elif self.alpha is None:
+            self.alpha = 0.
 
         self.buffer = 0
         self.buffer_server = 0
@@ -60,8 +63,10 @@ class VR_DIANA_SGDA(DistributedOptimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         super().__init__(game, options, prox)
         self.alpha = options.alpha
-        if self.alpha is None:
+        if self.alpha is None and isinstance(self.quantization, RandKQuantization):
             self.alpha = self.quantization.k / self.game.dim
+        elif self.alpha is None:
+            self.alpha = 0.
 
         self.p = options.p
         if self.p is None:
