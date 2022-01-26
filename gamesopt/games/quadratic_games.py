@@ -81,7 +81,7 @@ class QuadraticGame(Game):
 
     def save(self, path: Path) -> None:
         path.mkdir(parents=True, exist_ok=True)
-        filename = ""
+        filename = "model"
         if self.rank is not None:
             filename += "_%i"%self.rank
         filename = path / ("%s.pth" % filename)
@@ -89,7 +89,7 @@ class QuadraticGame(Game):
         torch.save({"config": self.config, "players": self.players, "matrix": self.matrix, "bias": self.bias}, filename)
 
     def load(self, path: Path, copy: bool = False) -> Game:
-        filename = ""
+        filename = "model"
         if self.rank is not None:
             filename += "_%i"%self.rank
         filename = path / ("%s.pth" % filename)
