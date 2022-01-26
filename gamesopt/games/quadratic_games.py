@@ -82,7 +82,7 @@ class QuadraticGame(Game):
             _loss = (_loss*self.players[i].view(1, -1)).sum(-1).mean()
 
             if self.importace_sampling:
-                _loss = _loss/(self.p*len(self.p))
+                _loss = _loss/(self.p[index]*len(self.p))
 
             loss.append(_loss)
         return loss
