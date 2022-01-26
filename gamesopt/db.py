@@ -122,7 +122,7 @@ class Database:
         exp_id = list(self.log_dir.glob("*/%s" % key))[0].parts[-2]
         exp = self.experiments[exp_id]
         exp.refresh()
-        return [key]
+        return exp[key]
 
     def refresh(self):
         self.loadExp()
