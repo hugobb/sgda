@@ -41,7 +41,7 @@ class DefaultQuantization:
 class RandKQuantization(DefaultQuantization):
     def __init__(self, options: QuantizationOptions) -> None:
         self.k = options.k
-
+        
     def __call__(self, x: torch.Tensor) ->  Tuple[torch.Tensor, int]:
         n = x.numel()
         indices = torch.randperm(n)[n - self.k]

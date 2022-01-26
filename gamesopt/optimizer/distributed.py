@@ -15,6 +15,7 @@ class QSGDA(DistributedOptimizer):
             
             self.n_bits += n_bits
             dist.all_reduce(grad)
+            grad /= self.size
             for i in range(self.game.num_players):
                 lr = self.lr(self.k)
                 g = self.game.unflatten(i, grad) # Reshape the grad to match players shape
@@ -28,6 +29,8 @@ class DIANA_SGDA(DistributedOptimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         super().__init__(game, options, prox)
         self.alpha = options.alpha
+        if self.alpha is None:
+            self.alpha = self.quantization.k / self.game.dim
 
         self.buffer = 0
         self.buffer_server = 0
@@ -57,6 +60,8 @@ class VR_DIANA_SGDA(DistributedOptimizer):
     def __init__(self, game: Game, options: OptimizerOptions = OptimizerOptions(), prox: Prox = Prox()) -> None:
         super().__init__(game, options, prox)
         self.alpha = options.alpha
+        if self.alpha is None:
+            self.alpha = self.quantization.k / self.game.dim
 
         self.p = options.p
         if self.p is None:

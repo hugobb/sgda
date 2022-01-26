@@ -15,6 +15,7 @@ class Game(ABC):
         self.master_node = None
         self.n_process = 1
         self.rank = rank
+        self.dim = sum(p.numel() for p in players)
 
         self.shape = []
         self.split_size = []

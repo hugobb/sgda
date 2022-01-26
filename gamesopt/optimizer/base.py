@@ -31,7 +31,7 @@ class OptimizerOptions:
     lr:  Union[LRSchedulerType, Tuple[LRSchedulerType, ...]] = 1e-2
     lr_e:  Optional[Union[LRSchedulerType, Tuple[LRSchedulerType, ...]]] = None
     p: Optional[float] = None
-    alpha: float = 0.
+    alpha: Optional[float] = None
     full_batch: bool = False
     batch_size: int = 1
     N: Optional[int] = None
