@@ -42,9 +42,9 @@ def train(config: TrainConfig = TrainConfig(), record: Record = Record()) -> Rec
         if config.load_file:
             metrics["dist2opt"].append(game.dist(game_copy))
 
-        optimizer.step()
-        
         record.save_metrics(metrics)
+
+        optimizer.step()
         
         if config.save_file is not None:
             game.save(config.save_file)
