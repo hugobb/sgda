@@ -1,6 +1,4 @@
 from pathlib import Path
-
-from rsa import compute_hash
 from .base import Game
 from .utils import random_vector
 import torch
@@ -105,7 +103,7 @@ class QuadraticGame(Game):
         self.bias = checkpoint["bias"]
         if self.importace_sampling:
             self.set_p() 
-            
+
         if copy:
             game = self.copy()
             game.players = checkpoint["players"]
