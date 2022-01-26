@@ -112,7 +112,7 @@ class Experiment:
 class Database:
     def __init__(self, log_dir: Path) -> None:
         self.log_dir = log_dir
-        self.experiments = {}
+        self.experiments: dict[str, Experiment] = {}
         self.loadExp()
     
     def __getitem__(self, key: str) -> Experiment:
@@ -120,7 +120,9 @@ class Database:
 
     def getRecord(self, key: str) -> Record:
         exp_id = list(self.log_dir.glob("*/%s" % key))[0].parts[-2]
-        return self.experiments[exp_id][key]
+        exp = self.experiments[exp_id]
+        exp.refresh()
+        return [key]
 
     def refresh(self):
         self.loadExp()
