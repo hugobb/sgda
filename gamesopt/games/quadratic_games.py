@@ -45,7 +45,7 @@ class QuadraticGame(Game):
 
         self.bias = torch.zeros(2, config.num_samples, config.dim)
         if config.bias:
-            self.bias = self.bias.normal_() / (10 * math.sqrt(self._dim))
+            self.bias = 100*self.bias.normal_() / math.sqrt(self._dim)
 
         if self.importance_sampling:
             self.set_p()       
