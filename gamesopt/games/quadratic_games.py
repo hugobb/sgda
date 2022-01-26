@@ -8,13 +8,14 @@ from typing import Optional, Union, Tuple
 from torch import linalg
 
 
-def make_random_matrix(num_samples: int, dim: int, mu: float = 0., ell: float = 1.) -> torch.Tensor:
+def make_random_matrix(num_samples: int, dim: int, mu: float = 0., ell: Optional[float] = None) -> torch.Tensor:
     matrix = torch.randn(num_samples, dim, dim)
     eigs: torch.Tensor
     eigs, V = torch.linalg.eig(matrix)
     eigs.real = abs(eigs.real)
-    R_0 = ((1/eigs).real).min(-1, keepdim=True)[0]
-    eigs = eigs*R_0*ell
+    if ell is not None:
+        R_0 = ((1/eigs).real).min(-1, keepdim=True)[0]
+        eigs = eigs*R_0*ell
     matrix = (V @ torch.diag_embed(eigs) @ torch.linalg.inv(V)).real
     s = torch.linalg.eigvals(matrix)
     #print(s.real.max(dim=-1)[0].min(), s.real.max(dim=-1)[0].max(), s.real.min(), s.imag.max(), abs(s.imag).min())
