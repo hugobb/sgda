@@ -80,6 +80,10 @@ class QuadraticGame(Game):
             for j in range(self.num_players):
                 _loss += (self.matrix[index, i*self._dim:(i+1)*self._dim, j*self._dim:(j+1)*self._dim]*self.players[j].view(1,1,-1)).sum(-1)
             _loss = (_loss*self.players[i].view(1, -1)).sum(-1).mean()
+
+            if self.importace_sampling:
+                _loss = _loss/(self.p*len(self.p))
+
             loss.append(_loss)
         return loss
 
