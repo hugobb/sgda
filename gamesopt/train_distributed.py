@@ -1,7 +1,8 @@
 from gamesopt.db import Record
 from .optimizer.base import DistributedOptimizer
 from .games import load_game
-from.optimizer import load_optimizer, OptimizerOptions, OptimizerType
+from .optimizer import load_optimizer, OptimizerOptions, OptimizerType
+from .optimizer.prox import load_prox
 from dataclasses import dataclass
 from collections import defaultdict
 from .train import TrainConfig
@@ -31,7 +32,8 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
     if config.load_file is not None:
         game_copy = game.load(config.load_file, copy=True)
     
-    optimizer: DistributedOptimizer = load_optimizer(game, config.optimizer)
+    prox = load_prox(config.prox)   
+    optimizer: DistributedOptimizer = load_optimizer(game, config.optimizer, prox=prox)
 
     print("Starting...")
     metrics = defaultdict(list)
