@@ -93,3 +93,13 @@ class DistributedOptimizer(Optimizer):
         n_bits = torch.tensor([self.n_bits])
         dist.all_reduce(n_bits)
         return int(n_bits)
+
+    def fixed_point_check(self, precision: float = 1., rank: int = 0) -> float:
+        grad = self.game.full_operator()
+        dist.reduce(grad, rank)
+        grad /= self.size
+        d = 0
+        for i in range(self.game.num_players):
+            g = self.game.unflatten(i, grad)
+            d += ((self.game.players[i] - self.prox(self.game.players[i] - precision*g, precision))**2).sum()
+        return float(d)

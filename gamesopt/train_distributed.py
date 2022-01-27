@@ -39,10 +39,12 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
         hamiltonian = game.hamiltonian()
         num_grad = optimizer.get_num_grad()
         n_bits = optimizer.get_n_bits()
+        prox_dist = optimizer.fixed_point_check(config.precision, 0)
         if rank == 0:
             metrics["hamiltonian"].append(hamiltonian)
             metrics["num_grad"].append(num_grad)
             metrics["n_bits"].append(n_bits)
+            metrics["prox_dist"].append(prox_dist)
             if config.load_file:
                 metrics["dist2opt"].append(game.dist(game_copy))
             

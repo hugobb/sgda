@@ -28,7 +28,7 @@ class QuadraticGameConfig:
     num_players: int = 2
     bias: bool = True
     mu: float = 0.
-    ell: Union[float, Tuple[float, float]] = 1.
+    ell: Optional[float] = None
     importance_sampling: bool = False
     matrix: Optional[torch.Tensor] = None
 
