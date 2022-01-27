@@ -50,3 +50,8 @@ def train(config: TrainConfig = TrainConfig(), record: Record = Record()) -> Rec
             game.save(config.save_file)
 
     return record
+
+
+if __name__ == '__main__':
+    record = train()
+    print("Saved results to: %s" % record.path)

@@ -82,5 +82,8 @@ def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Rec
         else:
             raise
     
-    record.load_metrics()
     return record
+
+if __name__ == "__main__":
+    record = train()
+    print("Saved results to: %s" % record.path)
