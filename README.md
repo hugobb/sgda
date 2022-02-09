@@ -29,6 +29,6 @@ QSGDA, DIANA-SGDA and VR-DIANA-SGDA are implemented using `torch.distributed`.
   - optimizer:
     - sgda.py   # code for SVRGDA and L-SVRGDA
     - distributed.py  # code for QSGDA, DIANA-SGDA and VR-DIANA-SGDA
-  - train.py  # To run teh experiments
+  - train.py  # To run the experiments
   - train_distributed #to run the distributed experiments.
 ```
