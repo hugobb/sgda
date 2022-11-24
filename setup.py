@@ -1,4 +1,3 @@
-from omegaconf import omegaconf
 from setuptools import setup
 
 setup(
@@ -6,7 +5,9 @@ setup(
     version='0.0.1',
     packages=['gamesopt'],
     install_requires=[
-        omegaconf,
+        "omegaconf",
+        "torch",
+        "matplotlib",
         
     ],
 )

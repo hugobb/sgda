@@ -1,4 +1,4 @@
-# Code for "Stochastic Gradient Descent-Ascent: Unified Theory and New Efficient Methods"
+# Code for [Stochastic Gradient Descent-Ascent: Unified Theory and New Efficient Methods](https://arxiv.org/abs/2202.07262)
 
 ## Requirements
 - `torch`
@@ -8,6 +8,9 @@
 
 ## Testing
 `python -m unittest discover -s tests`
+
+## Notebooks
+To reproduce the results of the paper, run the notebooks in the `notebooks` folder.
 
 ## Documentation
 ### Games
