@@ -1,7 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Tuple
-import torch.distributed as dist
 import torch
 
 

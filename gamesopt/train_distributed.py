@@ -37,6 +37,7 @@ def _train(rank: int, port: str, config: TrainDistributedConfig = TrainDistribut
 
     print("Starting...")
     metrics = defaultdict(list)
+    print(record.id)
     for _ in range(config.num_iter):
         hamiltonian = game.hamiltonian()
         num_grad = optimizer.get_num_grad()
@@ -81,7 +82,7 @@ def train(config: TrainDistributedConfig = TrainDistributedConfig(), record: Rec
             print("Port %s not available" % port)
         else:
             raise
-    
+
     return record
 
 if __name__ == "__main__":

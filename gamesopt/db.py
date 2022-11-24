@@ -49,6 +49,7 @@ class Record:
             self.metrics = OmegaConf.load(filename)
         else:
             self.metrics = None
+        return self.metrics
 
     def save_metrics(self, metrics):
         self.metrics = OmegaConf.structured(dict(metrics))
